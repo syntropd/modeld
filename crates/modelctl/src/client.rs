@@ -8,6 +8,12 @@ use std::io::{Read, Write};
 use std::os::unix::net::UnixStream;
 use std::path::Path;
 
+/// Maximum reply size accepted from the Varlink server (1 MiB).
+///
+/// Caps memory growth so a hostile or buggy daemon cannot OOM the client.
+/// Matches the corresponding server-side cap in `modeld-daemon`.
+pub const MAX_REPLY_BYTES: usize = 1024 * 1024;
+
 /// Synchronous Varlink client for modelctl command execution.
 pub struct VarlinkClient {
     stream: UnixStream,
@@ -32,7 +38,7 @@ impl VarlinkClient {
         self.stream.write_all(&bytes)?;
         self.stream.flush()?;
 
-        let mut reply_buf = Vec::new();
+        let mut reply_buf: Vec<u8> = Vec::new();
         let mut byte = [0u8; 1];
 
         loop {
@@ -42,6 +48,9 @@ impl VarlinkClient {
             }
             if byte[0] == 0x00 {
                 break;
+            }
+            if reply_buf.len() >= MAX_REPLY_BYTES {
+                return Err(anyhow!("Varlink reply exceeded {} bytes", MAX_REPLY_BYTES));
             }
             reply_buf.push(byte[0]);
         }

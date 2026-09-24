@@ -67,7 +67,14 @@ pub fn detect_safe_format<R: Read>(mut reader: R) -> Result<SafeFormat, ModeldEr
     // or a space AND whose first 8 bytes formed a small u64 — that admits
     // ~2^-16 random blobs. Tighten by actually peeking the JSON head.
     if n >= 9 {
-        let header_len = u64::from_le_bytes(header[0..8].try_into().unwrap()) as usize;
+        // Convert the 8 header bytes into a u64 length. The slice length is
+        // guaranteed to be exactly 8 by the `n >= 9` check above; map a
+        // hypothetical conversion failure to a recoverable I/O error rather
+        // than panicking, per the production no-unwrap rule.
+        let header_len_bytes: [u8; 8] = header[0..8]
+            .try_into()
+            .map_err(|e| ModeldError::Io(std::io::Error::new(std::io::ErrorKind::InvalidData, e)))?;
+        let header_len = u64::from_le_bytes(header_len_bytes) as usize;
         let json_byte = header[8];
         if (8..=8 * 1024 * 1024).contains(&header_len) && json_byte == b'{' {
             // The JSON must start with '{' and not contain an interior NUL

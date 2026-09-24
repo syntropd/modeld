@@ -2,6 +2,7 @@
 //!
 //! Enforces storage quotas while strictly protecting pinned system models.
 
+use crate::cas::digest_format::validate_digest_format;
 use crate::cas::store::CasStore;
 use crate::error::ModeldError;
 use std::fs::{self, File};
@@ -24,6 +25,7 @@ impl EvictionManager {
 
     /// Marks a model digest as permanently pinned against LRU eviction.
     pub fn pin(&self, digest: &str) -> Result<(), ModeldError> {
+        validate_digest_format(digest.trim())?;
         let pin_file = self.pinned_dir.join(digest.trim());
         File::create(pin_file)?;
         Ok(())
@@ -31,6 +33,7 @@ impl EvictionManager {
 
     /// Removes the pinned protection from a model digest.
     pub fn unpin(&self, digest: &str) -> Result<bool, ModeldError> {
+        validate_digest_format(digest.trim())?;
         let pin_file = self.pinned_dir.join(digest.trim());
         if pin_file.is_file() {
             fs::remove_file(pin_file)?;
@@ -42,6 +45,11 @@ impl EvictionManager {
 
     /// Checks if a model digest is currently pinned.
     pub fn is_pinned(&self, digest: &str) -> bool {
+        // Validate first so a crafted digest like `../../etc/passwd` can
+        // never be reported as pinned.
+        if validate_digest_format(digest.trim()).is_err() {
+            return false;
+        }
         self.pinned_dir.join(digest.trim()).is_file()
     }
 

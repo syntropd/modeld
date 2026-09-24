@@ -52,7 +52,10 @@ impl VarlinkReply {
 
     /// Serializes the reply to NUL-terminated JSON bytes for the wire.
     pub fn to_bytes(&self) -> Vec<u8> {
-        let mut bytes = serde_json::to_vec(self).unwrap_or_default();
+        // On the (extremely unlikely) event that serialization fails, emit a
+        // well-formed empty JSON object instead of a bare NUL byte. The peer
+        // can parse `{}`; a single `\0` would be a malformed reply.
+        let mut bytes = serde_json::to_vec(self).unwrap_or_else(|_| b"{}".to_vec());
         bytes.push(0x00);
         bytes
     }

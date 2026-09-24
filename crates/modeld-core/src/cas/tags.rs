@@ -75,12 +75,19 @@ impl TagRegistry {
     pub fn set_tag(&self, name: &str, tag: &str, digest: &str) -> Result<(), ModeldError> {
         let safe_name = validate_tag_segment(name)?;
         let safe_tag = validate_tag_segment(tag)?;
+        // Validate the *trimmed* digest at write time so downstream
+        // consumers (`EvictionManager::pin`, `fd_server`, `cas.blob_size`)
+        // see exactly the value that was validated. Validating the raw
+        // input but storing the trimmed one would let a caller bypass
+        // length checks via leading/trailing whitespace.
+        let trimmed_digest = digest.trim();
+        super::digest_format::validate_digest_format(trimmed_digest)?;
 
         let model_dir = self.tags_dir.join(safe_name);
         fs::create_dir_all(&model_dir)?;
         let tag_file = model_dir.join(safe_tag);
         let mut file = File::create(tag_file)?;
-        file.write_all(digest.trim().as_bytes())?;
+        file.write_all(trimmed_digest.as_bytes())?;
         file.flush()?;
         Ok(())
     }
@@ -151,11 +158,15 @@ impl TagRegistry {
     /// - `Ok(Some(digest))` for a known raw digest or `name:tag`.
     /// - `Ok(None)` if the identifier parses cleanly but no tag exists.
     /// - `Err(ModeldError::InvalidFormat)` if the identifier fails segment
-    ///   validation, so callers can distinguish "rejected as unsafe" from
-    ///   "not found" and report the right Varlink error.
+    ///   or digest-format validation, so callers can distinguish "rejected
+    ///   as unsafe" from "not found" and report the right Varlink error.
     pub fn resolve(&self, identifier: &str) -> Result<Option<String>, ModeldError> {
         let trimmed = identifier.trim();
+        // The raw-hex branch must pass through the same strict validator
+        // used at write time so callers can't smuggle uppercase hex
+        // (which would otherwise fail to match a lowercase CAS filename).
         if trimmed.len() == 64 && trimmed.chars().all(|c| c.is_ascii_hexdigit()) {
+            super::digest_format::validate_digest_format(trimmed)?;
             return Ok(Some(trimmed.to_string()));
         }
 

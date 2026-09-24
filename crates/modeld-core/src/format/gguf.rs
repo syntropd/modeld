@@ -97,7 +97,12 @@ fn read_string<R: Read>(reader: &mut R) -> std::io::Result<String> {
     }
     let mut buf = vec![0u8; len];
     reader.read_exact(&mut buf)?;
-    Ok(String::from_utf8_lossy(&buf).to_string())
+    // GGUF metadata keys are required to be valid UTF-8 per the spec.
+    // Replacing invalid bytes with U+FFFD would silently collapse
+    // distinct identifiers into a single key, so fail the parse instead.
+    std::str::from_utf8(&buf)
+        .map(|s| s.to_string())
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))
 }
 
 fn item_byte_size(item_type: u32) -> Option<u64> {
