@@ -1,0 +1,48 @@
+# release-plz configuration for the modeld workspace.
+#
+# Documentation: https://release-plz.dev/docs/config
+
+[workspace]
+# Allow release-plz to manage the workspace version itself. The
+# `[workspace.package] version` field in Cargo.toml is the source
+# of truth and is bumped automatically per release.
+version = true
+
+# Always update the lockfile with the new version.
+lockfile = true
+
+# Tag format: keep the leading 'v' for clarity in `git log --oneline`.
+git_tag_name = "v{{ version }}"
+
+# Reuse the existing CHANGELOG.md instead of replacing it. release-plz
+# will prepend a new section for each release.
+changelog_update = true
+changelog_path = "./CHANGELOG.md"
+
+# Don't tag pre-releases by default.
+pr_labels = ["release-plz"]
+
+# No git releases by default until the maintainer flips this on; the
+# release-plz PR is enough for now.
+git_release = "disable"
+
+# Don't publish to crates.io until we're ready. Set this to
+# "always" once the workspace is public.
+publish = "never"
+
+[changelog]
+# Use the same commit-author ordering release-plz uses for stable
+# output: type, then scope, then description.
+sort_by = "version"
+
+# Omit chore commits from the user-facing CHANGELOG to keep it
+# focused on user-visible changes. The git log still has the full
+# history.
+filter_commits = true
+commit_preprocessors = [
+    # Remove any leading conventional-commit type prefix and scope
+    # from the rendered bullet so the changelog reads naturally.
+    "```sh\n\
+    sed -E 's/^([a-z]+)(\\([^)]+\\))?!?: //'\n\
+    ```",
+]
