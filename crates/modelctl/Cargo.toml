@@ -1,5 +1,5 @@
 [package]
-name = "syntropd-modelctl"
+name = "modelctl"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -19,7 +19,7 @@ path = "src/main.rs"
 anyhow.workspace = true
 clap.workspace = true
 clap_complete.workspace = true
-modeld-core = { package = "syntropd-modeld-core", path = "../modeld-core" }
+modeld-core = { package = "syntrop-modeld-core", version = "0.2.0", path = "../modeld-core" }
 serde.workspace = true
 serde_json.workspace = true
 tokio.workspace = true

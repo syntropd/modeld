@@ -1,11 +1,11 @@
 [package]
-name = "syntropd-modeld-core"
+name = "syntrop-modeld-core"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
-publish = false
+description = "Core library and cryptographic content-addressable storage for syntrop-modeld"
 
 [lib]
 name = "modeld_core"

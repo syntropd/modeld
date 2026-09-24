@@ -7,8 +7,8 @@ publish = false
 
 [dependencies]
 anyhow.workspace = true
-modelctl = { package = "syntropd-modelctl", path = "../../crates/modelctl" }
-modeld-core = { package = "syntropd-modeld-core", path = "../../crates/modeld-core" }
+modelctl = { package = "modelctl", path = "../../crates/modelctl" }
+modeld-core = { package = "syntrop-modeld-core", path = "../../crates/modeld-core" }
 modeld-daemon = { package = "syntrop-modeld", path = "../../crates/modeld-daemon" }
 serde_json.workspace = true
 tempfile.workspace = true

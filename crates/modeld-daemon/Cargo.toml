@@ -5,6 +5,7 @@ edition.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
+description = "Content-addressable model cache and zero-copy descriptor broker for syntropd"
 
 [lib]
 name = "modeld_daemon"
@@ -17,7 +18,7 @@ path = "src/main.rs"
 [dependencies]
 anyhow.workspace = true
 libc.workspace = true
-modeld-core = { package = "syntropd-modeld-core", path = "../modeld-core" }
+modeld-core = { package = "syntrop-modeld-core", version = "0.2.0", path = "../modeld-core" }
 rustix.workspace = true
 serde.workspace = true
 serde_json.workspace = true
