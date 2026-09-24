@@ -1,0 +1,13 @@
+[package]
+name = "qa-edge"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+anyhow.workspace = true
+modeld-core = { path = "../../crates/modeld-core" }
+modeld-daemon = { path = "../../crates/modeld-daemon" }
+tempfile.workspace = true
+tokio.workspace = true

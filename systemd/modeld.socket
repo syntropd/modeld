@@ -1,0 +1,20 @@
+[Unit]
+Description=Syntropd modeld IPC Activation Sockets
+Documentation=https://github.com/syntropd/modeld
+PartOf=modeld.service
+
+[Socket]
+# File descriptor 3: Primary Varlink IPC interface
+ListenStream=/run/syntrop/io.syntrop.Model1
+SocketMode=0660
+SocketUser=modeld
+SocketGroup=modeld
+
+# File descriptor 4: SCM_RIGHTS descriptor handoff interface
+ListenStream=/run/syntrop/modeld-fd.sock
+SocketMode=0660
+SocketUser=modeld
+SocketGroup=modeld
+
+[Install]
+WantedBy=sockets.target

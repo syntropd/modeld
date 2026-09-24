@@ -1,0 +1,35 @@
+[Unit]
+Description=Syntropd Model Asset Store and Zero-Copy Descriptor Broker
+Documentation=https://github.com/syntropd/modeld
+After=network.target local-fs.target
+Requires=modeld.socket
+
+[Service]
+Type=notify
+ExecStart=/usr/bin/modeld
+WatchdogSec=15
+Restart=on-failure
+RestartSec=2s
+
+# Sandboxing and security hardening
+User=modeld
+Group=modeld
+DynamicUser=no
+Slice=ai.slice
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+MemoryDenyWriteExecute=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+
+# Allowed filesystem paths
+ReadWritePaths=/var/lib/models /run/syntrop
+RuntimeDirectory=syntrop
+StateDirectory=models
+
+[Install]
+WantedBy=multi-user.target
