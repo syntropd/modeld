@@ -7,7 +7,7 @@ publish = false
 
 [dependencies]
 anyhow.workspace = true
-modeld-core = { path = "../../crates/modeld-core" }
-modeld-daemon = { path = "../../crates/modeld-daemon" }
+modeld-core = { package = "syntropd-modeld-core", path = "../../crates/modeld-core" }
+modeld-daemon = { package = "syntropd-modeld", path = "../../crates/modeld-daemon" }
 tempfile.workspace = true
 tokio.workspace = true

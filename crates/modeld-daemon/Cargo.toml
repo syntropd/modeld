@@ -1,5 +1,5 @@
 [package]
-name = "modeld-daemon"
+name = "syntropd-modeld"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -7,6 +7,7 @@ authors.workspace = true
 repository.workspace = true
 
 [lib]
+name = "modeld_daemon"
 path = "src/lib.rs"
 
 [[bin]]
@@ -16,7 +17,7 @@ path = "src/main.rs"
 [dependencies]
 anyhow.workspace = true
 libc.workspace = true
-modeld-core = { path = "../modeld-core" }
+modeld-core = { package = "syntropd-modeld-core", path = "../modeld-core" }
 rustix.workspace = true
 serde.workspace = true
 serde_json.workspace = true
