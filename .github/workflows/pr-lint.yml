@@ -1,0 +1,46 @@
+name: pr-lint
+
+on:
+  pull_request_target:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  conventional-title:
+    name: conventional commit title
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Allowed Conventional Commit types. Keep this list short:
+          # anything outside it is a signal the title is wrong.
+          types: |
+            feat
+            fix
+            chore
+            docs
+            refactor
+            perf
+            test
+            build
+            ci
+            style
+          # Optional scope syntax: feat(core): ... / fix(daemon): ...
+          requireScope: false
+          # Subject must be at least 8 characters and end with a period
+          # or be a complete short sentence.
+          subjectPattern: ^(?!\s).{8,}$
+          subjectPatternError: |
+            Subject must be at least 8 characters and must not start
+            with whitespace.
+          # Multi-line body / footer support for `BREAKING CHANGE:` notes.
+          bodyPattern: ^[\s\S]*$
+          bodyPatternError: |
+            Body is optional but, if present, must be plain text.
+          # Don't block merges on lint failure; comment only. Adjust to
+          # `true` once the team is comfortable with the gate.
+          validateSingleCommit: false

@@ -46,3 +46,45 @@ fn test_varlink_model1_get_storage_stats() {
     let params = reply.unwrap().parameters.unwrap();
     assert_eq!(params.get("total_bytes").and_then(|v| v.as_u64()), Some(0));
 }
+
+#[test]
+fn test_varlink_model1_rejects_unsafe_identifier_as_invalid_identifier() {
+    let dir = tempdir().unwrap();
+    let cas = Arc::new(CasStore::new(dir.path()).unwrap());
+    let tags = Arc::new(TagRegistry::new(dir.path()).unwrap());
+    let eviction = Arc::new(EvictionManager::new(dir.path()).unwrap());
+    let ctx = ModelServiceContext { cas, tags, eviction };
+
+    for method in [
+        "io.syntrop.Model1.Inspect",
+        "io.syntrop.Model1.Pin",
+        "io.syntrop.Model1.Unpin",
+    ] {
+        // Identifier with shell metacharacters that must not be silently
+        // swallowed as "not found" — the daemon must return the dedicated
+        // `InvalidIdentifier` error.
+        let params = json!({ "id": "foo$bar" });
+        let reply = handle_model1_call(method, Some(&params), &ctx).expect("dispatcher returned None");
+        assert_eq!(
+            reply.error.as_deref(),
+            Some("io.syntrop.Model1.InvalidIdentifier"),
+            "{method} must reject unsafe identifier"
+        );
+    }
+}
+
+#[test]
+fn test_varlink_model1_unknown_identifier_is_no_such_model() {
+    let dir = tempdir().unwrap();
+    let cas = Arc::new(CasStore::new(dir.path()).unwrap());
+    let tags = Arc::new(TagRegistry::new(dir.path()).unwrap());
+    let eviction = Arc::new(EvictionManager::new(dir.path()).unwrap());
+    let ctx = ModelServiceContext { cas, tags, eviction };
+
+    let params = json!({ "id": "nonexistent:latest" });
+    let reply = handle_model1_call("io.syntrop.Model1.Inspect", Some(&params), &ctx).unwrap();
+    assert_eq!(
+        reply.error.as_deref(),
+        Some("io.syntrop.Model1.NoSuchModel")
+    );
+}

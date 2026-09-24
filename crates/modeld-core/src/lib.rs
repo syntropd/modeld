@@ -17,7 +17,9 @@ pub use config::{
     ModeldConfig, DEFAULT_CONFIG_PATH, DEFAULT_MAX_STORAGE_BYTES, DEFAULT_SOCKET_PATH,
     DEFAULT_STORAGE_PATH,
 };
-pub use descriptor::{create_sealed_memfd, recv_fd_scm_rights, send_fd_scm_rights};
+pub use descriptor::{
+    create_sealed_memfd, create_sealed_memfd_from_file, recv_fd_scm_rights, send_fd_scm_rights,
+};
 pub use error::ModeldError;
 pub use format::{
     detect_safe_format, parse_gguf_header, parse_safetensors_header, validate_file_safety,

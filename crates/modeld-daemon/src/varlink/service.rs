@@ -57,7 +57,7 @@ pub fn handle_service_call(method: &str, params: Option<&serde_json::Value>) -> 
         "org.varlink.service.GetInfo" => Some(VarlinkReply::ok(json!({
             "vendor": "Syntropd Project",
             "product": "modeld",
-            "version": "0.1.0",
+            "version": env!("CARGO_PKG_VERSION"),
             "url": "https://github.com/syntropd/modeld",
             "interfaces": [
                 "org.varlink.service",

@@ -5,7 +5,7 @@
 use crate::error::ModeldError;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::io::{Read, Seek};
+use std::io::{Read, Seek, SeekFrom};
 
 /// Extracted GGUF model metadata.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -50,26 +50,22 @@ pub fn parse_gguf_header<R: Read + Seek>(mut reader: R) -> Result<GgufMetadata, 
     let mut context_length = None;
     let mut file_type = None;
 
+    // Parse every declared KV. Truncation or unknown types must surface
+    // as an error rather than silently returning partial metadata that
+    // callers might treat as authoritative.
     for _ in 0..metadata_kv_count {
-        let key = match read_string(&mut reader) {
-            Ok(k) => k,
-            Err(_) => break,
-        };
-        let val_type = match read_u32_le(&mut reader) {
-            Ok(t) => t,
-            Err(_) => break,
-        };
+        let key = read_string(&mut reader)?;
+        let val_type = read_u32_le(&mut reader)?;
+        let val_str = skip_or_read_value(&mut reader, val_type)?;
 
-        if let Ok(val_str) = skip_or_read_value(&mut reader, val_type) {
-            if key == "general.architecture" {
-                architecture = Some(val_str.clone());
-            } else if key.ends_with(".context_length") {
-                context_length = val_str.parse::<u64>().ok();
-            } else if key == "general.file_type" {
-                file_type = val_str.parse::<u32>().ok();
-            }
-            attributes.insert(key, val_str);
+        if key == "general.architecture" {
+            architecture = Some(val_str.clone());
+        } else if key.ends_with(".context_length") {
+            context_length = val_str.parse::<u64>().ok();
+        } else if key == "general.file_type" {
+            file_type = val_str.parse::<u32>().ok();
         }
+        attributes.insert(key, val_str);
     }
 
     Ok(GgufMetadata {
@@ -104,6 +100,20 @@ fn read_string<R: Read>(reader: &mut R) -> std::io::Result<String> {
     Ok(String::from_utf8_lossy(&buf).to_string())
 }
 
+fn item_byte_size(item_type: u32) -> Option<u64> {
+    // GGUF value type widths in bytes. Arrays use this to compute the
+    // total payload size without parsing every element.
+    match item_type {
+        0 | 1 | 7 => Some(1),
+        2 | 3 => Some(2),
+        4 | 5 | 6 => Some(4),
+        10 | 11 | 12 => Some(8),
+        // String and array items are variable-length and cannot be sized here.
+        8 | 9 => None,
+        _ => None,
+    }
+}
+
 fn skip_or_read_value<R: Read + Seek>(reader: &mut R, val_type: u32) -> std::io::Result<String> {
     match val_type {
         0 => Ok(format!("{}", read_u8(reader)?)),
@@ -116,19 +126,52 @@ fn skip_or_read_value<R: Read + Seek>(reader: &mut R, val_type: u32) -> std::io:
         7 => Ok(format!("{}", read_u8(reader)? != 0)),
         8 => read_string(reader),
         9 => {
-            // Array: item_type (u32) + count (u64)
+            // Array: item_type (u32) + count (u64) + items...
+            //
+            // The previous implementation parsed only the first 1024 items
+            // and returned success, leaving the reader positioned mid-array
+            // so the next KV pair read garbage. Compute the payload size
+            // and seek over it instead.
             let item_type = read_u32_le(reader)?;
-            let count = read_u64_le(reader)? as usize;
-            for _ in 0..count.min(1024) {
-                let _ = skip_or_read_value(reader, item_type)?;
-            }
+            let count = read_u64_le(reader)?;
+            let payload_size = match item_byte_size(item_type) {
+                Some(width) => count
+                    .checked_mul(width)
+                    .ok_or_else(|| invalid_data("GGUF array length overflows u64"))?,
+                None => {
+                    // Variable-size elements (strings or nested arrays):
+                    // fall back to per-element skip, bounded by a safety cap.
+                    let mut skipped: u64 = 0;
+                    let max_iter = count.min(64 * 1024);
+                    for _ in 0..max_iter {
+                        skip_or_read_value(reader, item_type)?;
+                        skipped += 1;
+                    }
+                    if count > skipped {
+                        return Err(invalid_data(
+                            "GGUF array exceeds safety skip cap; refusing to skip",
+                        ));
+                    }
+                    return Ok(format!("[array: {} items]", count));
+                }
+            };
+            // Seek forward over the array payload in a single syscall.
+            let cur = reader.stream_position()?;
+            let end = cur
+                .checked_add(payload_size)
+                .ok_or_else(|| invalid_data("GGUF array seek end overflows u64"))?;
+            reader.seek(SeekFrom::Start(end))?;
             Ok(format!("[array: {} items]", count))
         }
         10 => Ok(format!("{}", read_u64_le(reader)?)),
         11 => Ok(format!("{}", read_i64_le(reader)?)),
         12 => Ok(format!("{:.4}", read_f64_le(reader)?)),
-        _ => Err(std::io::Error::new(std::io::ErrorKind::InvalidData, "Unknown GGUF type")),
+        _ => Err(invalid_data("Unknown GGUF type")),
     }
+}
+
+fn invalid_data(msg: &str) -> std::io::Error {
+    std::io::Error::new(std::io::ErrorKind::InvalidData, msg)
 }
 
 fn read_u8<R: Read>(reader: &mut R) -> std::io::Result<u8> {

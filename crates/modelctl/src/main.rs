@@ -7,7 +7,7 @@ use modeld_core::config::{DEFAULT_SOCKET_PATH, DEFAULT_STORAGE_PATH};
 use std::path::PathBuf;
 
 #[derive(Parser, Debug)]
-#[command(name = "modelctl", version = "0.1.0", about = "Control modeld CAS storage")]
+#[command(name = "modelctl", version, about = "Control modeld CAS storage")]
 pub struct Cli {
     /// Varlink Unix domain socket path.
     #[arg(long, global = true, default_value = DEFAULT_SOCKET_PATH)]
@@ -51,9 +51,10 @@ pub enum Commands {
 
     /// Prune unpinned models to reclaim storage capacity.
     Prune {
-        /// Target maximum storage quota in bytes.
+        /// Target maximum storage quota in bytes. Required to prevent
+        /// accidental deletion of every unpinned model.
         #[arg(long)]
-        max_bytes: Option<u64>,
+        max_bytes: u64,
     },
 
     /// Import a local file directly into the CAS store.

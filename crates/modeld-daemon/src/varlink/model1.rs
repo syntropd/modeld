@@ -64,13 +64,19 @@ fn handle_inspect(params: Option<&serde_json::Value>, ctx: &ModelServiceContext)
         None => return VarlinkReply::err("io.syntrop.Model1.InvalidIdentifier", None),
     };
 
-    let digest = match ctx.tags.resolve(id).unwrap_or(None) {
-        Some(d) => d,
-        None => {
+    let digest = match resolve_digest(&ctx.tags, id) {
+        ResolveOutcome::Ok(d) => d,
+        ResolveOutcome::Invalid => {
+            return VarlinkReply::err(
+                "io.syntrop.Model1.InvalidIdentifier",
+                Some(json!({ "id": id })),
+            );
+        }
+        ResolveOutcome::NotFound => {
             return VarlinkReply::err(
                 "io.syntrop.Model1.NoSuchModel",
                 Some(json!({ "id": id })),
-            )
+            );
         }
     };
 
@@ -95,13 +101,19 @@ fn handle_pin(params: Option<&serde_json::Value>, ctx: &ModelServiceContext) -> 
         None => return VarlinkReply::err("io.syntrop.Model1.InvalidIdentifier", None),
     };
 
-    let digest = match ctx.tags.resolve(id).unwrap_or(None) {
-        Some(d) => d,
-        None => {
+    let digest = match resolve_digest(&ctx.tags, id) {
+        ResolveOutcome::Ok(d) => d,
+        ResolveOutcome::Invalid => {
+            return VarlinkReply::err(
+                "io.syntrop.Model1.InvalidIdentifier",
+                Some(json!({ "id": id })),
+            );
+        }
+        ResolveOutcome::NotFound => {
             return VarlinkReply::err(
                 "io.syntrop.Model1.NoSuchModel",
                 Some(json!({ "id": id })),
-            )
+            );
         }
     };
 
@@ -120,13 +132,19 @@ fn handle_unpin(params: Option<&serde_json::Value>, ctx: &ModelServiceContext) -
         None => return VarlinkReply::err("io.syntrop.Model1.InvalidIdentifier", None),
     };
 
-    let digest = match ctx.tags.resolve(id).unwrap_or(None) {
-        Some(d) => d,
-        None => {
+    let digest = match resolve_digest(&ctx.tags, id) {
+        ResolveOutcome::Ok(d) => d,
+        ResolveOutcome::Invalid => {
+            return VarlinkReply::err(
+                "io.syntrop.Model1.InvalidIdentifier",
+                Some(json!({ "id": id })),
+            );
+        }
+        ResolveOutcome::NotFound => {
             return VarlinkReply::err(
                 "io.syntrop.Model1.NoSuchModel",
                 Some(json!({ "id": id })),
-            )
+            );
         }
     };
 
@@ -139,11 +157,40 @@ fn handle_unpin(params: Option<&serde_json::Value>, ctx: &ModelServiceContext) -
     }
 }
 
+/// Distinguishes the three outcomes of resolving a user-supplied identifier:
+/// found, well-formed-but-unknown, and rejected as unsafe.
+enum ResolveOutcome {
+    Ok(String),
+    Invalid,
+    NotFound,
+}
+
+/// Resolves an identifier to a digest, distinguishing "rejected by segment
+/// validation" from "no such model" so the daemon can return the correct
+/// Varlink error code.
+fn resolve_digest(tags: &TagRegistry, id: &str) -> ResolveOutcome {
+    match tags.resolve(id) {
+        Ok(Some(d)) => ResolveOutcome::Ok(d),
+        Ok(None) => ResolveOutcome::NotFound,
+        Err(_) => ResolveOutcome::Invalid,
+    }
+}
+
 fn handle_prune(params: Option<&serde_json::Value>, ctx: &ModelServiceContext) -> VarlinkReply {
     let max_bytes = params
         .and_then(|p| p.get("max_bytes"))
         .and_then(|v| v.as_u64())
         .unwrap_or(0);
+
+    if max_bytes == 0 {
+        return VarlinkReply::err(
+            "io.syntrop.Model1.InvalidParameter",
+            Some(json!({
+                "parameter": "max_bytes",
+                "reason": "max_bytes must be greater than zero"
+            })),
+        );
+    }
 
     match ctx.eviction.prune(&ctx.cas, max_bytes) {
         Ok(reclaimed) => VarlinkReply::ok(json!({ "reclaimed_bytes": reclaimed })),
