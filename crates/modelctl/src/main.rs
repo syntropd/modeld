@@ -51,9 +51,10 @@ pub enum Commands {
 
     /// Prune unpinned models to reclaim storage capacity.
     Prune {
-        /// Target maximum storage quota in bytes.
+        /// Target maximum storage quota in bytes. Required to prevent
+        /// accidental deletion of every unpinned model.
         #[arg(long)]
-        max_bytes: Option<u64>,
+        max_bytes: u64,
     },
 
     /// Import a local file directly into the CAS store.

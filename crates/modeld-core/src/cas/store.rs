@@ -2,8 +2,8 @@
 //!
 //! Stores immutable model blobs keyed by SHA-256 with atomic tempfile commit.
 
-use crate::cas::digest::compute_stream_digest;
 use crate::error::ModeldError;
+use sha2::{Digest, Sha256};
 use std::fs::{self, File};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
@@ -64,15 +64,19 @@ impl CasStore {
 
     /// Stores data from a reader into the CAS store atomically.
     ///
-    /// Writes to a temporary staging file, verifies the computed SHA-256,
-    /// and performs an atomic rename into the final content-address location.
+    /// Writes to a temporary staging file while streaming SHA-256, verifies
+    /// the computed digest against the optional expected digest, and renames
+    /// the staged file into the final content-addressed location. The hash
+    /// is computed inline so a multi-gigabyte import does not require a
+    /// second full pass over the staged file.
     pub fn store_blob<R: Read>(
         &self,
         mut reader: R,
         expected_digest: Option<&str>,
     ) -> Result<(String, u64), ModeldError> {
-        let temp_path = self.incoming_dir().join(format!("stage-{}", uuid_or_timestamp()));
+        let temp_path = self.incoming_dir().join(format!("stage-{}", stage_nonce()));
         let mut temp_file = File::create(&temp_path)?;
+        let mut hasher = Sha256::new();
         let mut buffer = [0u8; 65536];
         let mut total_bytes: u64 = 0;
 
@@ -81,17 +85,14 @@ impl CasStore {
             if n == 0 {
                 break;
             }
+            hasher.update(&buffer[..n]);
             temp_file.write_all(&buffer[..n])?;
             total_bytes += n as u64;
         }
         temp_file.flush()?;
         drop(temp_file);
 
-        // Compute hash of the written file
-        let computed_digest = {
-            let read_handle = File::open(&temp_path)?;
-            compute_stream_digest(read_handle)?
-        };
+        let computed_digest = format!("{:x}", hasher.finalize());
 
         // Validate against optional expected digest
         if let Some(expected) = expected_digest {
@@ -117,7 +118,7 @@ impl CasStore {
     }
 }
 
-fn uuid_or_timestamp() -> u128 {
+fn stage_nonce() -> u128 {
     use std::time::{SystemTime, UNIX_EPOCH};
     SystemTime::now()
         .duration_since(UNIX_EPOCH)

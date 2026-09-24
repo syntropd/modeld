@@ -35,16 +35,34 @@ fn test_lru_prune_preserves_pinned_models() {
     let b3 = vec![3u8; 1000];
 
     let (d1, _) = cas.store_blob(Cursor::new(&b1), None).unwrap();
-    let (_d2, _) = cas.store_blob(Cursor::new(&b2), None).unwrap();
-    let (_d3, _) = cas.store_blob(Cursor::new(&b3), None).unwrap();
+    let (d2, _) = cas.store_blob(Cursor::new(&b2), None).unwrap();
+    let (d3, _) = cas.store_blob(Cursor::new(&b3), None).unwrap();
 
     // Pin blob 1 (important system emergency model)
     eviction.pin(&d1).unwrap();
 
-    // Prune down to 1500 bytes (should evict unpinned d2 or d3, but NEVER d1)
-    let reclaimed = eviction.prune(&cas, 1500).unwrap();
-    assert!(reclaimed >= 1000);
+    // Prune down to 2500 bytes. Total is 3000, pinned d1=1000 is
+    // protected, so the loop must remove unpinned blobs until
+    // current_total <= 2500. The oldest unpinned (d2 by mtime) is
+    // evicted, bringing the total to 2000 <= 2500, then loop exits.
+    // Exactly one unpinned blob must be reclaimed and exactly one
+    // must survive.
+    let reclaimed = eviction.prune(&cas, 2500).unwrap();
+    assert_eq!(
+        reclaimed, 1000,
+        "exactly one unpinned blob must be reclaimed"
+    );
 
-    // Pinned model MUST survive
+    // Pinned model MUST survive.
     assert!(cas.has_blob(&d1));
+
+    // Exactly one of {d2, d3} survives.
+    let survivors: u64 = [&d2, &d3]
+        .iter()
+        .map(|d| if cas.has_blob(d) { 1000 } else { 0 })
+        .sum();
+    assert_eq!(
+        survivors, 1000,
+        "exactly one unpinned blob must survive after the prune"
+    );
 }

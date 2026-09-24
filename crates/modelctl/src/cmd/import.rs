@@ -34,8 +34,12 @@ pub fn run_import<P: AsRef<Path>>(
         let (name, variant) = match parts.as_slice() {
             [n, v] => (*n, *v),
             [n] => (*n, "latest"),
-            _ => ("model", "latest"),
+            // An empty tag string is a user error, not a silent default.
+            _ => return Err(anyhow!("Tag must be in 'name:variant' form, got '{}'", t)),
         };
+        // `TagRegistry::set_tag` now validates segments; propagate its
+        // error so the user sees the rejection instead of a panic or
+        // a silently dropped tag.
         tags.set_tag(name, variant, &digest)?;
         println!("  Tagged:  {}:{}", name, variant);
     }

@@ -16,17 +16,31 @@ pub struct SafeTensorsMetadata {
     pub attributes: HashMap<String, String>,
 }
 
+/// Maximum SafeTensors JSON header size in bytes. Real SafeTensors headers
+/// are typically well under 1 MiB; the cap here is a DoS guard against
+/// attacker-controlled `header_len` values that would otherwise force a
+/// multi-hundred-megabyte allocation per import.
+const MAX_SAFETENSORS_HEADER: usize = 8 * 1024 * 1024;
+
 /// Reads SafeTensors metadata from a readable stream.
 pub fn parse_safetensors_header<R: Read>(mut reader: R) -> Result<SafeTensorsMetadata, ModeldError> {
     let mut len_buf = [0u8; 8];
     reader.read_exact(&mut len_buf)?;
     let header_len = u64::from_le_bytes(len_buf) as usize;
 
-    // Safety guard: reject unreasonable header sizes (> 32 MiB)
-    if header_len == 0 || header_len > 33_554_432 {
+    // Safety guard: reject empty or unreasonably large header lengths.
+    // A 33 MiB allocation per import is a reliable OOM vector against
+    // memory-constrained modeld hosts; tighten to 8 MiB which still
+    // accommodates every legitimate SafeTensors file shipped today.
+    if header_len == 0 {
+        return Err(ModeldError::InvalidFormat(
+            "SafeTensors header length is zero".into(),
+        ));
+    }
+    if header_len > MAX_SAFETENSORS_HEADER {
         return Err(ModeldError::InvalidFormat(format!(
-            "Invalid SafeTensors header length: {} bytes",
-            header_len
+            "SafeTensors header length {} exceeds {} byte safety cap",
+            header_len, MAX_SAFETENSORS_HEADER
         )));
     }
 
