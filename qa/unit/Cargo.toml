@@ -9,7 +9,7 @@ publish = false
 anyhow.workspace = true
 modelctl = { package = "syntropd-modelctl", path = "../../crates/modelctl" }
 modeld-core = { package = "syntropd-modeld-core", path = "../../crates/modeld-core" }
-modeld-daemon = { package = "syntropd-modeld", path = "../../crates/modeld-daemon" }
+modeld-daemon = { package = "syntrop-modeld", path = "../../crates/modeld-daemon" }
 serde_json.workspace = true
 tempfile.workspace = true
 tokio.workspace = true
