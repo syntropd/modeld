@@ -7,7 +7,7 @@ use modeld_core::config::{DEFAULT_SOCKET_PATH, DEFAULT_STORAGE_PATH};
 use std::path::PathBuf;
 
 #[derive(Parser, Debug)]
-#[command(name = "modelctl", version = "0.1.0", about = "Control modeld CAS storage")]
+#[command(name = "modelctl", version, about = "Control modeld CAS storage")]
 pub struct Cli {
     /// Varlink Unix domain socket path.
     #[arg(long, global = true, default_value = DEFAULT_SOCKET_PATH)]
