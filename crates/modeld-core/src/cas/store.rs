@@ -7,12 +7,18 @@ use sha2::{Digest, Sha256};
 use std::fs::{self, File};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicU64, Ordering};
 
 /// Primary manager for Content-Addressable Storage blobs on host filesystem.
 #[derive(Debug, Clone)]
 pub struct CasStore {
     root_dir: PathBuf,
 }
+
+/// Per-process monotonic counter combined with the PID to give every
+/// staging file a unique name without depending on nanosecond clock
+/// resolution.
+static STAGE_COUNTER: AtomicU64 = AtomicU64::new(0);
 
 impl CasStore {
     /// Initializes a new CAS store with the designated root path.
@@ -106,22 +112,22 @@ impl CasStore {
         }
 
         let target_path = self.blob_path(&computed_digest);
-        if target_path.exists() {
-            // Deduplication: blob already present, clean up temporary file
-            let _ = fs::remove_file(&temp_path);
-        } else {
-            // Atomic commit via rename
-            fs::rename(&temp_path, &target_path)?;
-        }
+        // `rename(2)` atomically replaces the destination, so concurrent
+        // imports of identical content converge on the same inode without a
+        // pre-check race. If another writer already produced this digest the
+        // kernel will discard our staging file in favour of the existing
+        // target, which is safe under CAS semantics (same content => same
+        // digest => interchangeable blobs).
+        fs::rename(&temp_path, &target_path)?;
 
         Ok((computed_digest, total_bytes))
     }
 }
 
-fn stage_nonce() -> u128 {
-    use std::time::{SystemTime, UNIX_EPOCH};
-    SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .map(|d| d.as_nanos())
-        .unwrap_or(0)
+/// Builds a per-process unique staging filename suffix from the process ID
+/// and a monotonic counter. The counter increments on every call, so two
+/// imports issued in the same nanosecond still get distinct filenames.
+fn stage_nonce() -> String {
+    let counter = STAGE_COUNTER.fetch_add(1, Ordering::Relaxed);
+    format!("{:x}-{:x}", std::process::id(), counter)
 }

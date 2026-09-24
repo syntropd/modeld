@@ -9,5 +9,5 @@ pub mod service;
 
 pub use model1::{handle_model1_call, ModelServiceContext};
 pub use protocol::{VarlinkCall, VarlinkReply};
-pub use server::run_varlink_server;
+pub use server::{handle_varlink_client, run_varlink_server, MAX_MSG_BYTES};
 pub use service::handle_service_call;

@@ -9,9 +9,15 @@ mod digest_tests;
 #[cfg(test)]
 mod eviction_tests;
 #[cfg(test)]
+mod format_string_tests;
+#[cfg(test)]
 mod gguf_tests;
 #[cfg(test)]
+mod pin_validation_tests;
+#[cfg(test)]
 mod safetensors_tests;
+#[cfg(test)]
+mod server_tests;
 #[cfg(test)]
 mod store_tests;
 #[cfg(test)]

@@ -7,6 +7,7 @@ use modeld_core::cas::{CasStore, EvictionManager, TagRegistry};
 use serde_json::json;
 use std::fs;
 use std::sync::Arc;
+use tracing::warn;
 
 /// Context holding shared storage references for Varlink method execution.
 #[derive(Clone)]
@@ -42,7 +43,10 @@ fn handle_list(ctx: &ModelServiceContext) -> VarlinkReply {
 
     // Map tagged models
     for tag in tags {
-        let size = ctx.cas.blob_size(&tag.digest).unwrap_or(0);
+        let size = ctx.cas.blob_size(&tag.digest).unwrap_or_else(|e| {
+            warn!("blob_size failed for tag {}:{}: {}", tag.name, tag.tag, e);
+            0
+        });
         let pinned = ctx.eviction.is_pinned(&tag.digest);
         entries.push(json!({
             "id": format!("{}:{}", tag.name, tag.tag),
@@ -80,7 +84,10 @@ fn handle_inspect(params: Option<&serde_json::Value>, ctx: &ModelServiceContext)
         }
     };
 
-    let size = ctx.cas.blob_size(&digest).unwrap_or(0);
+    let size = ctx.cas.blob_size(&digest).unwrap_or_else(|e| {
+        warn!("blob_size failed for digest {}: {}", digest, e);
+        0
+    });
     let pinned = ctx.eviction.is_pinned(&digest);
 
     VarlinkReply::ok(json!({
