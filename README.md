@@ -13,8 +13,8 @@
 
 ## The Problem: AI Weight Duplication on Linux
 
-Modern AI runtimes (Ollama, vLLM, HuggingFace, Whisper) behave like isolated package managers:
-1. **Massive Disk Bloat**: Each framework redownloads 4 GB–70 GB model weights into hidden dotfiles (`~/.cache`, `~/.ollama`), exhausting disk capacity.
+Modern AI runtimes (vLLM, HuggingFace, Whisper) behave like isolated package managers:
+1. **Massive Disk Bloat**: Each framework redownloads 4 GB–70 GB model weights into hidden dotfiles (`~/.cache`, `~/.local/share`), exhausting disk capacity.
 2. **Buffer Memory Thrashing**: Passing models between daemons copies gigabytes through userspace memory buffers, causing RAM spikes and cache eviction.
 3. **Execution Vulnerabilities**: Many frameworks silently deserialize untrusted Python pickle formats (`.bin`, `.pt`), introducing arbitrary code execution vulnerabilities.
 
