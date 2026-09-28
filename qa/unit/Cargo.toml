@@ -10,6 +10,7 @@ anyhow.workspace = true
 modelctl = { package = "modelctl", path = "../../crates/modelctl" }
 modeld-core = { package = "syntrop-modeld-core", path = "../../crates/modeld-core" }
 modeld-daemon = { package = "syntrop-modeld", path = "../../crates/modeld-daemon" }
+rustix.workspace = true
 serde_json.workspace = true
 tempfile.workspace = true
 tokio.workspace = true

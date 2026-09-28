@@ -49,3 +49,59 @@ pub enum ModeldError {
     #[error("Configuration error: {0}")]
     Config(String),
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_display_messages_name_the_failure() {
+        let cases: Vec<(ModeldError, &str)> = vec![
+            (
+                ModeldError::DigestMismatch {
+                    expected: "aa".into(),
+                    computed: "bb".into(),
+                },
+                "Cryptographic digest mismatch: expected aa, computed bb",
+            ),
+            (
+                ModeldError::InvalidFormat("bad header".into()),
+                "Invalid model format header: bad header",
+            ),
+            (
+                ModeldError::SecurityRejection("pickle".into()),
+                "Insecure model format rejected by policy: pickle",
+            ),
+            (
+                ModeldError::NotFound("wisp".into()),
+                "Model not found: wisp",
+            ),
+            (
+                ModeldError::QuotaExceeded {
+                    required_bytes: 10,
+                    free_bytes: 4,
+                },
+                "Storage quota exceeded: required 10 bytes, free 4 bytes",
+            ),
+            (
+                ModeldError::Syscall("EPERM".into()),
+                "Kernel syscall error: EPERM",
+            ),
+            (
+                ModeldError::Config("missing key".into()),
+                "Configuration error: missing key",
+            ),
+        ];
+        for (err, expected) in cases {
+            assert_eq!(err.to_string(), expected);
+        }
+    }
+
+    #[test]
+    fn test_io_converts_with_filesystem_context() {
+        let io_err = std::io::Error::new(std::io::ErrorKind::NotFound, "missing blob");
+        let err = ModeldError::from(io_err);
+        assert!(matches!(err, ModeldError::Io(_)));
+        assert!(err.to_string().starts_with("Filesystem I/O failure: "));
+    }
+}

@@ -108,3 +108,60 @@ fn main() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn parse(args: &[&str]) -> Cli {
+        Cli::try_parse_from(args).expect("cli parse")
+    }
+
+    #[test]
+    fn test_cli_list_defaults() {
+        let cli = parse(&["modelctl", "list"]);
+        assert!(!cli.json);
+        assert!(matches!(cli.command, Commands::List));
+        assert_eq!(cli.socket, PathBuf::from(DEFAULT_SOCKET_PATH));
+        assert_eq!(cli.storage_path, PathBuf::from(DEFAULT_STORAGE_PATH));
+    }
+
+    #[test]
+    fn test_cli_ls_alias_and_global_flags() {
+        let cli = parse(&["modelctl", "--json", "--socket", "/tmp/t.sock", "ls"]);
+        assert!(cli.json);
+        assert!(matches!(cli.command, Commands::List));
+        assert_eq!(cli.socket, PathBuf::from("/tmp/t.sock"));
+    }
+
+    #[test]
+    fn test_cli_inspect_pin_unpin_take_id() {
+        let cli = parse(&["modelctl", "inspect", "wisp:1b"]);
+        assert!(matches!(cli.command, Commands::Inspect { .. }));
+        let cli = parse(&["modelctl", "pin", "wisp:1b"]);
+        assert!(matches!(cli.command, Commands::Pin { .. }));
+        let cli = parse(&["modelctl", "unpin", "wisp:1b"]);
+        assert!(matches!(cli.command, Commands::Unpin { .. }));
+    }
+
+    #[test]
+    fn test_cli_prune_requires_max_bytes() {
+        assert!(Cli::try_parse_from(["modelctl", "prune"]).is_err());
+        let cli = parse(&["modelctl", "prune", "--max-bytes", "1024"]);
+        assert!(matches!(cli.command, Commands::Prune { max_bytes: 1024 }));
+    }
+
+    #[test]
+    fn test_cli_import_tag_is_optional() {
+        let cli = parse(&["modelctl", "import", "/tmp/m.gguf"]);
+        assert!(matches!(cli.command, Commands::Import { tag: None, .. }));
+        let cli = parse(&["modelctl", "import", "/tmp/m.gguf", "--tag", "wisp:1b"]);
+        assert!(matches!(cli.command, Commands::Import { tag: Some(_), .. }));
+    }
+
+    #[test]
+    fn test_cli_completions_takes_shell() {
+        let cli = parse(&["modelctl", "completions", "bash"]);
+        assert!(matches!(cli.command, Commands::Completions { .. }));
+    }
+}

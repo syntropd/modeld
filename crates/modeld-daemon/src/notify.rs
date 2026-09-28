@@ -5,9 +5,22 @@
 use rustix::net::{sendto_unix, SendFlags, SocketAddrUnix};
 use std::env;
 use std::os::unix::net::UnixDatagram;
+use std::time::Duration;
 
 /// Maximum notify datagram size (systemd protocol cap).
 const NOTIFY_MAX: usize = 8 * 1024 * 1024;
+
+/// Default ping interval when no `$WATCHDOG_USEC` is advertised by systemd.
+const DEFAULT_WATCHDOG_PERIOD_SECS: u64 = 10;
+
+/// Minimum ping interval when systemd advertises a sub-3-second watchdog.
+const MIN_WATCHDOG_PERIOD_SECS: u64 = 1;
+
+/// Upper bound on the computed ping interval. Without this, a manually
+/// inflated `$WATCHDOG_USEC` (e.g. via a container override) could
+/// silently reduce ping frequency to the point where systemd's kill
+/// timer fires before the next heartbeat. Clamping prevents that.
+const MAX_WATCHDOG_PERIOD_SECS: u64 = 300;
 
 /// Builds a `SocketAddrUnix` for `$NOTIFY_SOCKET`, supporting both
 /// filesystem paths (`/run/systemd/notify`) and abstract namespaces (`@notify`).
@@ -80,6 +93,31 @@ pub fn notify_stopping() -> bool {
     send_notify("STOPPING=1\n")
 }
 
+/// Computes the watchdog ping period from the optional `$WATCHDOG_USEC`.
+///
+/// Returns a [`Duration`] equal to one-third of the advertised timeout when
+/// the timeout is at least 3 seconds (so the daemon pings three times per
+/// watchdog window), `MIN_WATCHDOG_PERIOD_SECS` when the timeout is shorter,
+/// and `DEFAULT_WATCHDOG_PERIOD_SECS` when no `$WATCHDOG_USEC` is set.
+///
+/// `WATCHDOG_USEC=0` is the documented systemd sentinel for "watchdog
+/// disabled"; in that case `Duration::ZERO` is returned and the watchdog
+/// task is never spawned.
+pub fn watchdog_period_from_env() -> Duration {
+    let usec = std::env::var("WATCHDOG_USEC")
+        .ok()
+        .and_then(|s| s.parse::<u64>().ok());
+    let raw = match usec {
+        Some(0) => return Duration::ZERO,
+        Some(usec) if usec >= 3_000_000 => Duration::from_micros(usec / 3),
+        Some(_) => Duration::from_secs(MIN_WATCHDOG_PERIOD_SECS),
+        None => Duration::from_secs(DEFAULT_WATCHDOG_PERIOD_SECS),
+    };
+    // Clamp so absurdly large values (operator typo, container override)
+    // don't silently disable the watchdog.
+    raw.min(Duration::from_secs(MAX_WATCHDOG_PERIOD_SECS))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -125,5 +163,35 @@ mod tests {
         // Anything over NOTIFY_MAX must be rejected without touching the socket.
         let huge = "X".repeat(NOTIFY_MAX + 1);
         assert!(!send_notify(&huge));
+    }
+
+    #[test]
+    fn test_watchdog_period_from_env_cases() {
+        // Sequential sub-cases in one test: WATCHDOG_USEC is
+        // process-global and parallel tests must not see a half-set value.
+        let saved = env::var("WATCHDOG_USEC").ok();
+
+        env::remove_var("WATCHDOG_USEC");
+        assert_eq!(watchdog_period_from_env(), Duration::from_secs(10));
+
+        env::set_var("WATCHDOG_USEC", "0");
+        assert!(watchdog_period_from_env().is_zero());
+
+        env::set_var("WATCHDOG_USEC", "9000000");
+        assert_eq!(watchdog_period_from_env(), Duration::from_secs(3));
+
+        env::set_var("WATCHDOG_USEC", "1000000");
+        assert_eq!(watchdog_period_from_env(), Duration::from_secs(1));
+
+        env::set_var("WATCHDOG_USEC", "10800000000");
+        assert_eq!(watchdog_period_from_env(), Duration::from_secs(300));
+
+        env::set_var("WATCHDOG_USEC", "not-a-number");
+        assert_eq!(watchdog_period_from_env(), Duration::from_secs(10));
+
+        match saved {
+            Some(v) => env::set_var("WATCHDOG_USEC", v),
+            None => env::remove_var("WATCHDOG_USEC"),
+        }
     }
 }

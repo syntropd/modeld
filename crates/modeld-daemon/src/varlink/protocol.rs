@@ -60,3 +60,38 @@ impl VarlinkReply {
         bytes
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn test_reply_ok_roundtrip() {
+        let reply = VarlinkReply::ok(json!({"a": 1}));
+        let bytes = reply.to_bytes();
+        assert_eq!(bytes.last(), Some(&0x00));
+        let back: VarlinkReply = serde_json::from_slice(&bytes[..bytes.len() - 1]).unwrap();
+        assert_eq!(back.parameters, Some(json!({"a": 1})));
+        assert!(back.error.is_none());
+    }
+
+    #[test]
+    fn test_reply_err_skips_empty_fields() {
+        let reply = VarlinkReply::err("io.syntrop.Model1.NoSuchModel", None);
+        let text = serde_json::to_string(&reply).unwrap();
+        assert!(text.contains("NoSuchModel"));
+        assert!(!text.contains("parameters"));
+        assert!(!text.contains("continues"));
+    }
+
+    #[test]
+    fn test_call_deserializes_more_flag() {
+        let call: VarlinkCall = serde_json::from_str(
+            r#"{"method": "io.syntrop.Model1.List", "parameters": null, "more": true}"#,
+        )
+        .unwrap();
+        assert_eq!(call.method, "io.syntrop.Model1.List");
+        assert_eq!(call.more, Some(true));
+    }
+}

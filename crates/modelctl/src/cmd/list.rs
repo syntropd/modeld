@@ -23,7 +23,10 @@ pub fn run_list(client: &mut VarlinkClient, json_output: bool) -> Result<()> {
         return Ok(());
     }
 
-    println!("{:<24} {:<12} {:<10} {:<64}", "ID", "SIZE", "PINNED", "DIGEST");
+    println!(
+        "{:<24} {:<12} {:<10} {:<64}",
+        "ID", "SIZE", "PINNED", "DIGEST"
+    );
     println!("{:-<24} {:-<12} {:-<10} {:-<64}", "", "", "", "");
 
     for m in models {
@@ -57,5 +60,22 @@ fn format_bytes(bytes: u64) -> String {
         format!("{:.0} KiB", bytes as f64 / KIB as f64)
     } else {
         format!("{} B", bytes)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_format_bytes_unit_boundaries() {
+        assert_eq!(format_bytes(0), "0 B");
+        assert_eq!(format_bytes(512), "512 B");
+        assert_eq!(format_bytes(1023), "1023 B");
+        assert_eq!(format_bytes(1024), "1 KiB");
+        assert_eq!(format_bytes(2048), "2 KiB");
+        assert_eq!(format_bytes(1024 * 1024), "1.0 MiB");
+        assert_eq!(format_bytes(3 * 1024 * 1024 / 2), "1.5 MiB");
+        assert_eq!(format_bytes(2 * 1024 * 1024 * 1024), "2.00 GiB");
     }
 }

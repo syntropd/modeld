@@ -1,28 +1,14 @@
 //! Comprehensive 1:1 unit QA test suite for modeld.
 
 #[cfg(test)]
-mod config_tests;
+mod cas;
 #[cfg(test)]
-mod descriptor_tests;
+mod config;
 #[cfg(test)]
-mod digest_tests;
+mod descriptor;
 #[cfg(test)]
-mod eviction_tests;
+mod format;
 #[cfg(test)]
-mod format_string_tests;
+mod modelctl;
 #[cfg(test)]
-mod gguf_tests;
-#[cfg(test)]
-mod pin_validation_tests;
-#[cfg(test)]
-mod safetensors_tests;
-#[cfg(test)]
-mod server_tests;
-#[cfg(test)]
-mod store_tests;
-#[cfg(test)]
-mod tags_tests;
-#[cfg(test)]
-mod validator_tests;
-#[cfg(test)]
-mod varlink_tests;
+mod varlink;
