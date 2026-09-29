@@ -15,4 +15,3 @@ pub use protocol::{VarlinkCall, VarlinkReply};
 pub use register::handle_register;
 pub use server::{handle_varlink_client, run_varlink_server, MAX_MSG_BYTES};
 pub use service::handle_service_call;
-

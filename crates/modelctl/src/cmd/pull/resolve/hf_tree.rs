@@ -45,8 +45,11 @@ pub async fn resolve_hf_repo(
             .map(|e| e.path.clone())
             .collect();
 
-        let has_shards = st_files.iter().any(|f| f.contains("-of-") || f.contains(".part"));
-        if has_shards || (st_files.len() > 1 && !st_files.iter().any(|f| f == "model.safetensors")) {
+        let has_shards = st_files
+            .iter()
+            .any(|f| f.contains("-of-") || f.contains(".part"));
+        if has_shards || (st_files.len() > 1 && !st_files.iter().any(|f| f == "model.safetensors"))
+        {
             return Err(anyhow!(
                 "Sharded Safetensors model detected in '{}' (found {} shards: {}). \
                 Sharded weights are not supported for single-stream pull. \
@@ -58,7 +61,10 @@ pub async fn resolve_hf_repo(
         }
 
         if st_files.is_empty() {
-            return Err(anyhow!("No .safetensors files found in repository '{}'", repo));
+            return Err(anyhow!(
+                "No .safetensors files found in repository '{}'",
+                repo
+            ));
         }
         st_files
     } else {
@@ -88,7 +94,12 @@ pub async fn resolve_hf_repo(
         entries
             .iter()
             .find(|e| e.r#type == "file" && e.path == "tokenizer.json")
-            .map(|_| format!("https://huggingface.co/{}/resolve/main/tokenizer.json", repo))
+            .map(|_| {
+                format!(
+                    "https://huggingface.co/{}/resolve/main/tokenizer.json",
+                    repo
+                )
+            })
     } else {
         None
     };
@@ -98,7 +109,11 @@ pub async fn resolve_hf_repo(
         filename: selected,
         name,
         tag,
-        format: if is_safetensors { "safetensors".to_string() } else { "gguf".to_string() },
+        format: if is_safetensors {
+            "safetensors".to_string()
+        } else {
+            "gguf".to_string()
+        },
         tokenizer_url,
     })
 }

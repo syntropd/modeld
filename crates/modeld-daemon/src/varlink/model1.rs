@@ -183,7 +183,9 @@ fn handle_get_storage_stats(ctx: &ModelServiceContext) -> VarlinkReply {
     if let Ok(entries) = fs::read_dir(cas_dir) {
         for entry in entries.flatten() {
             let name = entry.file_name().to_string_lossy().to_string();
-            if name.starts_with("sha256-") && (name.ends_with(".gguf") || name.ends_with(".safetensors")) {
+            if name.starts_with("sha256-")
+                && (name.ends_with(".gguf") || name.ends_with(".safetensors"))
+            {
                 if let Ok(meta) = entry.metadata() {
                     if meta.is_file() {
                         #[cfg(unix)]

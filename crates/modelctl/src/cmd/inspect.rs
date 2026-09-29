@@ -16,7 +16,10 @@ pub fn run_inspect(client: &mut VarlinkClient, id: &str, json_output: bool) -> R
     if let Some(info) = params.get("info") {
         let digest = info.get("digest").and_then(|v| v.as_str()).unwrap_or("-");
         let size = info.get("size_bytes").and_then(|v| v.as_u64()).unwrap_or(0);
-        let pinned = info.get("pinned").and_then(|v| v.as_bool()).unwrap_or(false);
+        let pinned = info
+            .get("pinned")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false);
         let format = info.get("format").and_then(|v| v.as_str()).unwrap_or("-");
 
         println!("Model: {}", id);

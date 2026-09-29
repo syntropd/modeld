@@ -89,7 +89,11 @@ fn build_gguf_header_with_large_array() -> Vec<u8> {
     buf.extend_from_slice(&9u32.to_le_bytes()); // value type: array
     buf.extend_from_slice(&4u32.to_le_bytes()); // array element type: u32
     buf.extend_from_slice(&5000u64.to_le_bytes()); // element count
-    buf.extend(std::iter::repeat(0u32).take(5000).flat_map(|n| n.to_le_bytes()));
+    buf.extend(
+        std::iter::repeat(0u32)
+            .take(5000)
+            .flat_map(|n| n.to_le_bytes()),
+    );
 
     buf
 }
@@ -131,5 +135,8 @@ fn test_parse_gguf_header_truncated_at_kv_reports_error() {
 
     // Second KV is missing; the parser must surface this as an error.
     let res = parse_gguf_header(Cursor::new(buf));
-    assert!(res.is_err(), "truncated header must not be silently accepted");
+    assert!(
+        res.is_err(),
+        "truncated header must not be silently accepted"
+    );
 }

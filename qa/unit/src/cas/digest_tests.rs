@@ -2,15 +2,18 @@
 
 use modeld_core::cas::digest::{compute_file_digest, compute_stream_digest, verify_stream_digest};
 use std::io::Cursor;
-use tempfile::NamedTempFile;
 use std::io::Write;
+use tempfile::NamedTempFile;
 
 #[test]
 fn test_compute_stream_digest_empty() {
     let data = b"";
     let digest = compute_stream_digest(Cursor::new(data)).expect("Digest computation failed");
     // SHA-256 of empty string
-    assert_eq!(digest, "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+    assert_eq!(
+        digest,
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    );
 }
 
 #[test]
@@ -23,7 +26,8 @@ fn test_compute_stream_digest_known_vector() {
 #[test]
 fn test_compute_file_digest_success() {
     let mut file = NamedTempFile::new().unwrap();
-    file.write_all(b"test file payload for digest verification").unwrap();
+    file.write_all(b"test file payload for digest verification")
+        .unwrap();
     file.flush().unwrap();
 
     let digest = compute_file_digest(file.path()).expect("File digest failed");

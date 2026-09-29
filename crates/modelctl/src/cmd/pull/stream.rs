@@ -31,7 +31,8 @@ pub async fn run_pull<P: AsRef<Path>>(
         .context("Failed to build HTTP client")?;
 
     println!("Resolving model: {} (format: {})", model_spec, format);
-    let resolved = resolve_model_with_format(&client, model_spec, format, quant, tag_override).await?;
+    let resolved =
+        resolve_model_with_format(&client, model_spec, format, quant, tag_override).await?;
     println!("  Target: {}:{}", resolved.name, resolved.tag);
     println!("  Source: {}", resolved.download_url);
 
@@ -42,7 +43,11 @@ pub async fn run_pull<P: AsRef<Path>>(
     if tag_file.is_file() && !force {
         let existing_digest = fs::read_to_string(&tag_file).unwrap_or_default();
         let digest_trim = existing_digest.trim();
-        let ext = if resolved.format.eq_ignore_ascii_case("safetensors") { "safetensors" } else { "gguf" };
+        let ext = if resolved.format.eq_ignore_ascii_case("safetensors") {
+            "safetensors"
+        } else {
+            "gguf"
+        };
         let flat_dest = cas_dir.join(format!("sha256-{}.{}", digest_trim, ext));
         let blob_dest = cas_dir.join("blobs").join("sha256").join(digest_trim);
         if flat_dest.is_file() || blob_dest.is_file() {

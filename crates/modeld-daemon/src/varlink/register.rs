@@ -127,7 +127,10 @@ pub fn handle_register(
                         ))
                     }
                     Err(e) => {
-                        warn!("SafeTensors header parse failed for {}: {}", clean_digest, e);
+                        warn!(
+                            "SafeTensors header parse failed for {}: {}",
+                            clean_digest, e
+                        );
                         Some(format!("Digest: {}", clean_digest))
                     }
                 };
@@ -144,9 +147,9 @@ pub fn handle_register(
                             .attributes
                             .get("general.parameter_count")
                             .or_else(|| {
-                                meta.architecture
-                                    .as_ref()
-                                    .and_then(|a| meta.attributes.get(&format!("{}.parameter_count", a)))
+                                meta.architecture.as_ref().and_then(|a| {
+                                    meta.attributes.get(&format!("{}.parameter_count", a))
+                                })
                             })
                             .cloned()
                             .unwrap_or_else(|| meta.tensor_count.to_string());

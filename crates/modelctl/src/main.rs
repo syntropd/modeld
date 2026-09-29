@@ -209,10 +209,24 @@ mod tests {
     #[test]
     fn test_cli_pull_options() {
         let cli = parse(&["modelctl", "pull", "qwen2.5:0.5b"]);
-        assert!(matches!(cli.command, Commands::Pull { ref model, ref format, force: false, .. } if model == "qwen2.5:0.5b" && format == "gguf"));
-        let cli = parse(&["modelctl", "pull", "org/repo", "--format", "safetensors", "--quant", "Q4_K_M", "--tag", "custom:v1", "--force"]);
-        assert!(matches!(cli.command, Commands::Pull { ref model, ref format, ref quant, ref tag, force: true }
-            if model == "org/repo" && format == "safetensors" && quant.as_deref() == Some("Q4_K_M") && tag.as_deref() == Some("custom:v1")));
+        assert!(
+            matches!(cli.command, Commands::Pull { ref model, ref format, force: false, .. } if model == "qwen2.5:0.5b" && format == "gguf")
+        );
+        let cli = parse(&[
+            "modelctl",
+            "pull",
+            "org/repo",
+            "--format",
+            "safetensors",
+            "--quant",
+            "Q4_K_M",
+            "--tag",
+            "custom:v1",
+            "--force",
+        ]);
+        assert!(
+            matches!(cli.command, Commands::Pull { ref model, ref format, ref quant, ref tag, force: true }
+            if model == "org/repo" && format == "safetensors" && quant.as_deref() == Some("Q4_K_M") && tag.as_deref() == Some("custom:v1"))
+        );
     }
 }
-

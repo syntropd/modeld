@@ -4,8 +4,8 @@
 
 use crate::error::ModeldError;
 use rustix::net::{
-    recvmsg, sendmsg, RecvAncillaryBuffer, RecvAncillaryMessage, RecvFlags,
-    SendAncillaryBuffer, SendAncillaryMessage, SendFlags,
+    recvmsg, sendmsg, RecvAncillaryBuffer, RecvAncillaryMessage, RecvFlags, SendAncillaryBuffer,
+    SendAncillaryMessage, SendFlags,
 };
 use std::io::{IoSlice, IoSliceMut};
 use std::os::unix::io::{AsFd, OwnedFd};
@@ -19,9 +19,11 @@ pub fn send_fd_scm_rights<S: AsFd, F: AsFd>(
     let mut space = [0u8; rustix::cmsg_space!(ScmRights(1))];
     let mut ancillary = SendAncillaryBuffer::new(&mut space);
     let fds = [fd_to_send.as_fd()];
-    
+
     if !ancillary.push(SendAncillaryMessage::ScmRights(&fds)) {
-        return Err(ModeldError::Syscall("Failed to push FD to SCM_RIGHTS buffer".into()));
+        return Err(ModeldError::Syscall(
+            "Failed to push FD to SCM_RIGHTS buffer".into(),
+        ));
     }
 
     let iov = [IoSlice::new(payload)];

@@ -32,11 +32,7 @@ fn test_pin_rejects_empty_and_short_digests() {
     let eviction = EvictionManager::new(dir.path()).unwrap();
 
     for bad in ["", "abc", &"a".repeat(63), &"a".repeat(65)] {
-        assert!(
-            eviction.pin(bad).is_err(),
-            "pin must reject {:?}",
-            bad
-        );
+        assert!(eviction.pin(bad).is_err(), "pin must reject {:?}", bad);
         assert!(!eviction.is_pinned(bad));
     }
 }
@@ -47,7 +43,9 @@ fn test_pin_rejects_uppercase_hex() {
     let eviction = EvictionManager::new(dir.path()).unwrap();
 
     let bad = "A".repeat(64);
-    let err = eviction.pin(&bad).expect_err("pin must reject uppercase hex");
+    let err = eviction
+        .pin(&bad)
+        .expect_err("pin must reject uppercase hex");
     assert!(matches!(err, ModeldError::InvalidFormat(_)));
     assert!(!eviction.is_pinned(&bad));
 }

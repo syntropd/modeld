@@ -56,7 +56,9 @@ impl CasStore {
         if flat_gguf.is_file() {
             return flat_gguf;
         }
-        let flat_st = self.cas_dir().join(format!("sha256-{}.safetensors", digest));
+        let flat_st = self
+            .cas_dir()
+            .join(format!("sha256-{}.safetensors", digest));
         if flat_st.is_file() {
             return flat_st;
         }

@@ -4,5 +4,12 @@ pub mod client;
 pub mod cmd;
 
 pub use client::VarlinkClient;
-pub use cmd::{run_completions, run_import, run_inspect, run_list, run_pin, run_prune, run_pull, run_unpin};
+pub use cmd::run_completions;
+pub use cmd::run_import;
+pub use cmd::run_inspect;
+pub use cmd::run_list;
+pub use cmd::run_pin;
+pub use cmd::run_prune;
+pub use cmd::run_pull;
+pub use cmd::run_unpin;
 pub use reqwest;

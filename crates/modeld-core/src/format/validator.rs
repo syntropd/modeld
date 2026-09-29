@@ -51,7 +51,9 @@ pub fn detect_safe_format<R: Read>(mut reader: R) -> Result<SafeFormat, ModeldEr
     let mut header = [0u8; 16];
     let n = reader.read(&mut header)?;
     if n < 4 {
-        return Err(ModeldError::InvalidFormat("Stream too short for header".into()));
+        return Err(ModeldError::InvalidFormat(
+            "Stream too short for header".into(),
+        ));
     }
 
     // GGUF magic: "GGUF" (4 ASCII bytes).
@@ -96,9 +98,9 @@ pub fn detect_safe_format<R: Read>(mut reader: R) -> Result<SafeFormat, ModeldEr
         // guaranteed to be exactly 8 by the `n >= 9` check above; map a
         // hypothetical conversion failure to a recoverable I/O error rather
         // than panicking, per the production no-unwrap rule.
-        let header_len_bytes: [u8; 8] = header[0..8]
-            .try_into()
-            .map_err(|e| ModeldError::Io(std::io::Error::new(std::io::ErrorKind::InvalidData, e)))?;
+        let header_len_bytes: [u8; 8] = header[0..8].try_into().map_err(|e| {
+            ModeldError::Io(std::io::Error::new(std::io::ErrorKind::InvalidData, e))
+        })?;
         let header_len = u64::from_le_bytes(header_len_bytes) as usize;
         let json_byte = header[8];
         if (8..=8 * 1024 * 1024).contains(&header_len) && json_byte == b'{' {
@@ -132,8 +134,8 @@ pub fn detect_safe_format<R: Read>(mut reader: R) -> Result<SafeFormat, ModeldEr
 fn looks_like_safetensors_json_head(bytes: &[u8]) -> bool {
     for &b in bytes {
         match b {
-            b'{' | b'}' | b'"' | b':' | b',' | b' ' | b'\t' | b'\n' | b'\r'
-            | b'[' | b']' | b'.' | b'-' | b'+' | b'_' | b'/' | b'\\' => {}
+            b'{' | b'}' | b'"' | b':' | b',' | b' ' | b'\t' | b'\n' | b'\r' | b'[' | b']'
+            | b'.' | b'-' | b'+' | b'_' | b'/' | b'\\' => {}
             0..=0x1F | 0x7F => return false,
             _ => {}
         }

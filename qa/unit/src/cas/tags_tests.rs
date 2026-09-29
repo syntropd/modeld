@@ -9,12 +9,18 @@ fn test_tag_set_get_remove_lifecycle() {
     let registry = TagRegistry::new(dir.path()).unwrap();
 
     let digest = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
-    registry.set_tag("qwen2.5", "7b", digest).expect("Failed to set tag");
+    registry
+        .set_tag("qwen2.5", "7b", digest)
+        .expect("Failed to set tag");
 
-    let retrieved = registry.get_tag("qwen2.5", "7b").expect("Failed to get tag");
+    let retrieved = registry
+        .get_tag("qwen2.5", "7b")
+        .expect("Failed to get tag");
     assert_eq!(retrieved, Some(digest.to_string()));
 
-    let removed = registry.remove_tag("qwen2.5", "7b").expect("Failed to remove tag");
+    let removed = registry
+        .remove_tag("qwen2.5", "7b")
+        .expect("Failed to remove tag");
     assert!(removed);
 
     let retrieved_after = registry.get_tag("qwen2.5", "7b").unwrap();
@@ -47,7 +53,10 @@ fn test_tag_resolve_name_variant_and_raw_digest() {
     registry.set_tag("phi3", "mini", digest).unwrap();
 
     // Resolves explicit variant
-    assert_eq!(registry.resolve("phi3:mini").unwrap(), Some(digest.to_string()));
+    assert_eq!(
+        registry.resolve("phi3:mini").unwrap(),
+        Some(digest.to_string())
+    );
 
     // Resolves raw 64-char hex digest directly
     assert_eq!(registry.resolve(digest).unwrap(), Some(digest.to_string()));

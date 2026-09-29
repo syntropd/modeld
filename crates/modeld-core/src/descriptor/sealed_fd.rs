@@ -45,7 +45,10 @@ pub fn create_sealed_memfd(name: &str, data: &[u8]) -> Result<OwnedFd, ModeldErr
 /// bounded regardless of source size. The kernel page cache handles
 /// readahead so the wall-clock cost is comparable to a plain sequential
 /// read of the file.
-pub fn create_sealed_memfd_from_file(name: &str, source: &mut File) -> Result<OwnedFd, ModeldError> {
+pub fn create_sealed_memfd_from_file(
+    name: &str,
+    source: &mut File,
+) -> Result<OwnedFd, ModeldError> {
     let flags = MemfdFlags::ALLOW_SEALING | MemfdFlags::CLOEXEC;
     let raw_fd = memfd_create(name, flags)
         .map_err(|e| ModeldError::Syscall(format!("memfd_create failed: {}", e)))?;

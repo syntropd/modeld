@@ -20,7 +20,11 @@ async fn test_handle_varlink_client_overflows_with_protocol_error() {
     let cas = Arc::new(CasStore::new(dir.path()).unwrap());
     let tags = Arc::new(TagRegistry::new(dir.path()).unwrap());
     let eviction = Arc::new(EvictionManager::new(dir.path()).unwrap());
-    let ctx = ModelServiceContext { cas, tags, eviction };
+    let ctx = ModelServiceContext {
+        cas,
+        tags,
+        eviction,
+    };
 
     let (server, peer) = UnixStream::pair().expect("socketpair");
     server.set_nonblocking(true).expect("set nonblocking");
@@ -106,7 +110,11 @@ async fn test_handle_varlink_client_responds_to_valid_call() {
     let cas = Arc::new(CasStore::new(dir.path()).unwrap());
     let tags = Arc::new(TagRegistry::new(dir.path()).unwrap());
     let eviction = Arc::new(EvictionManager::new(dir.path()).unwrap());
-    let ctx = ModelServiceContext { cas, tags, eviction };
+    let ctx = ModelServiceContext {
+        cas,
+        tags,
+        eviction,
+    };
 
     let (server, peer) = UnixStream::pair().expect("socketpair");
     server.set_nonblocking(true).expect("set nonblocking");

@@ -19,7 +19,7 @@ pub fn reflink_or_copy<P: AsRef<Path>, Q: AsRef<Path>>(
     dest: Q,
 ) -> Result<bool, ModeldError> {
     let src_file = File::open(&src)?;
-    
+
     // Create destination file with truncate
     let dest_file = File::create(&dest)?;
 

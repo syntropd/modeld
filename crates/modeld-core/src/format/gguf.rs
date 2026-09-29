@@ -29,12 +29,17 @@ pub fn parse_gguf_header<R: Read + Seek>(mut reader: R) -> Result<GgufMetadata, 
     let mut magic = [0u8; 4];
     reader.read_exact(&mut magic)?;
     if &magic != b"GGUF" {
-        return Err(ModeldError::InvalidFormat("Missing GGUF magic bytes".into()));
+        return Err(ModeldError::InvalidFormat(
+            "Missing GGUF magic bytes".into(),
+        ));
     }
 
     let version = read_u32_le(&mut reader)?;
     if version < 2 || version > 3 {
-        return Err(ModeldError::InvalidFormat(format!("Unsupported GGUF version: {}", version)));
+        return Err(ModeldError::InvalidFormat(format!(
+            "Unsupported GGUF version: {}",
+            version
+        )));
     }
 
     let tensor_count = read_u64_le(&mut reader)?;
@@ -42,7 +47,9 @@ pub fn parse_gguf_header<R: Read + Seek>(mut reader: R) -> Result<GgufMetadata, 
 
     // Protect against pathological or malformed headers
     if metadata_kv_count > 4096 {
-        return Err(ModeldError::InvalidFormat("GGUF metadata count exceeds safe threshold".into()));
+        return Err(ModeldError::InvalidFormat(
+            "GGUF metadata count exceeds safe threshold".into(),
+        ));
     }
 
     let mut attributes = HashMap::new();
@@ -93,7 +100,10 @@ fn read_u64_le<R: Read>(reader: &mut R) -> std::io::Result<u64> {
 fn read_string<R: Read>(reader: &mut R) -> std::io::Result<String> {
     let len = read_u64_le(reader)? as usize;
     if len > 1024 {
-        return Err(std::io::Error::new(std::io::ErrorKind::InvalidData, "Key string exceeds limit"));
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::InvalidData,
+            "Key string exceeds limit",
+        ));
     }
     let mut buf = vec![0u8; len];
     reader.read_exact(&mut buf)?;
@@ -184,22 +194,36 @@ fn read_u8<R: Read>(reader: &mut R) -> std::io::Result<u8> {
     reader.read_exact(&mut b)?;
     Ok(b[0])
 }
-fn read_i8<R: Read>(reader: &mut R) -> std::io::Result<i8> { Ok(read_u8(reader)? as i8) }
+fn read_i8<R: Read>(reader: &mut R) -> std::io::Result<i8> {
+    Ok(read_u8(reader)? as i8)
+}
 fn read_u16_le<R: Read>(reader: &mut R) -> std::io::Result<u16> {
-    let mut b = [0u8; 2]; reader.read_exact(&mut b)?; Ok(u16::from_le_bytes(b))
+    let mut b = [0u8; 2];
+    reader.read_exact(&mut b)?;
+    Ok(u16::from_le_bytes(b))
 }
 fn read_i16_le<R: Read>(reader: &mut R) -> std::io::Result<i16> {
-    let mut b = [0u8; 2]; reader.read_exact(&mut b)?; Ok(i16::from_le_bytes(b))
+    let mut b = [0u8; 2];
+    reader.read_exact(&mut b)?;
+    Ok(i16::from_le_bytes(b))
 }
 fn read_i32_le<R: Read>(reader: &mut R) -> std::io::Result<i32> {
-    let mut b = [0u8; 4]; reader.read_exact(&mut b)?; Ok(i32::from_le_bytes(b))
+    let mut b = [0u8; 4];
+    reader.read_exact(&mut b)?;
+    Ok(i32::from_le_bytes(b))
 }
 fn read_f32_le<R: Read>(reader: &mut R) -> std::io::Result<f32> {
-    let mut b = [0u8; 4]; reader.read_exact(&mut b)?; Ok(f32::from_le_bytes(b))
+    let mut b = [0u8; 4];
+    reader.read_exact(&mut b)?;
+    Ok(f32::from_le_bytes(b))
 }
 fn read_i64_le<R: Read>(reader: &mut R) -> std::io::Result<i64> {
-    let mut b = [0u8; 8]; reader.read_exact(&mut b)?; Ok(i64::from_le_bytes(b))
+    let mut b = [0u8; 8];
+    reader.read_exact(&mut b)?;
+    Ok(i64::from_le_bytes(b))
 }
 fn read_f64_le<R: Read>(reader: &mut R) -> std::io::Result<f64> {
-    let mut b = [0u8; 8]; reader.read_exact(&mut b)?; Ok(f64::from_le_bytes(b))
+    let mut b = [0u8; 8];
+    reader.read_exact(&mut b)?;
+    Ok(f64::from_le_bytes(b))
 }

@@ -9,7 +9,11 @@ fn test_edge_gguf_truncated_at_all_lengths() {
     for i in 0..raw.len() {
         let truncated = &raw[..i];
         let res = parse_gguf_header(Cursor::new(truncated));
-        assert!(res.is_err(), "Truncation at length {} did not fail safely", i);
+        assert!(
+            res.is_err(),
+            "Truncation at length {} did not fail safely",
+            i
+        );
     }
 }
 

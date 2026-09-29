@@ -28,7 +28,10 @@ pub(crate) fn resolve_digest(tags: &TagRegistry, id: &str) -> ResolveOutcome {
 }
 
 /// Handles `io.syntrop.Model1.Inspect` method invocation.
-pub fn handle_inspect(params: Option<&serde_json::Value>, ctx: &ModelServiceContext) -> VarlinkReply {
+pub fn handle_inspect(
+    params: Option<&serde_json::Value>,
+    ctx: &ModelServiceContext,
+) -> VarlinkReply {
     let id = match params.and_then(|p| p.get("id")).and_then(|v| v.as_str()) {
         Some(s) => s,
         None => return VarlinkReply::err("io.syntrop.Model1.InvalidIdentifier", None),
@@ -43,10 +46,7 @@ pub fn handle_inspect(params: Option<&serde_json::Value>, ctx: &ModelServiceCont
             );
         }
         ResolveOutcome::NotFound => {
-            return VarlinkReply::err(
-                "io.syntrop.Model1.NoSuchModel",
-                Some(json!({ "id": id })),
-            );
+            return VarlinkReply::err("io.syntrop.Model1.NoSuchModel", Some(json!({ "id": id })));
         }
     };
 
@@ -83,9 +83,9 @@ pub fn handle_inspect(params: Option<&serde_json::Value>, ctx: &ModelServiceCont
                                 .attributes
                                 .get("general.parameter_count")
                                 .or_else(|| {
-                                    meta.architecture
-                                        .as_ref()
-                                        .and_then(|a| meta.attributes.get(&format!("{}.parameter_count", a)))
+                                    meta.architecture.as_ref().and_then(|a| {
+                                        meta.attributes.get(&format!("{}.parameter_count", a))
+                                    })
                                 })
                                 .cloned()
                                 .unwrap_or_else(|| meta.tensor_count.to_string());

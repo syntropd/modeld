@@ -55,7 +55,10 @@ error SecurityRejection(reason: string)
 "#;
 
 /// Handles standard org.varlink.service method dispatches.
-pub fn handle_service_call(method: &str, params: Option<&serde_json::Value>) -> Option<VarlinkReply> {
+pub fn handle_service_call(
+    method: &str,
+    params: Option<&serde_json::Value>,
+) -> Option<VarlinkReply> {
     match method {
         "org.varlink.service.GetInfo" => Some(VarlinkReply::ok(json!({
             "vendor": "Syntropd Project",

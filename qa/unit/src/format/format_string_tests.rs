@@ -27,10 +27,7 @@ fn test_parse_gguf_header_rejects_non_utf8_key() {
     buf.extend_from_slice(&1u64.to_le_bytes());
 
     let res = parse_gguf_header(Cursor::new(buf));
-    assert!(
-        res.is_err(),
-        "non-UTF-8 metadata key must be a parse error"
-    );
+    assert!(res.is_err(), "non-UTF-8 metadata key must be a parse error");
 }
 
 #[test]
