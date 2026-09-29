@@ -67,6 +67,24 @@ pub enum Commands {
         tag: Option<String>,
     },
 
+    /// Pull a model from Hugging Face or registry.
+    Pull {
+        /// Model alias or Hugging Face repository (e.g. "qwen2.5:0.5b" or "org/repo").
+        model: String,
+
+        /// Quantization filter (e.g. "Q4_K_M").
+        #[arg(long)]
+        quant: Option<String>,
+
+        /// Optional tag in `name:variant` format.
+        #[arg(long)]
+        tag: Option<String>,
+
+        /// Force re-download even if already present.
+        #[arg(long, short)]
+        force: bool,
+    },
+
     /// Generate shell completions.
     Completions {
         /// Target shell (bash, zsh, fish).
@@ -74,7 +92,8 @@ pub enum Commands {
     },
 }
 
-fn main() -> anyhow::Result<()> {
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
@@ -100,6 +119,22 @@ fn main() -> anyhow::Result<()> {
         }
         Commands::Import { source, tag } => {
             cmd::run_import(&cli.storage_path, &source, tag.as_deref())?;
+        }
+        Commands::Pull {
+            model,
+            quant,
+            tag,
+            force,
+        } => {
+            cmd::run_pull(
+                &cli.storage_path,
+                &cli.socket,
+                &model,
+                quant.as_deref(),
+                tag.as_deref(),
+                force,
+            )
+            .await?;
         }
         Commands::Completions { shell } => {
             cmd::run_completions(&shell, Cli::command());
@@ -164,4 +199,14 @@ mod tests {
         let cli = parse(&["modelctl", "completions", "bash"]);
         assert!(matches!(cli.command, Commands::Completions { .. }));
     }
+
+    #[test]
+    fn test_cli_pull_options() {
+        let cli = parse(&["modelctl", "pull", "qwen2.5:0.5b"]);
+        assert!(matches!(cli.command, Commands::Pull { ref model, force: false, .. } if model == "qwen2.5:0.5b"));
+        let cli = parse(&["modelctl", "pull", "org/repo", "--quant", "Q4_K_M", "--tag", "custom:v1", "--force"]);
+        assert!(matches!(cli.command, Commands::Pull { ref model, ref quant, ref tag, force: true }
+            if model == "org/repo" && quant.as_deref() == Some("Q4_K_M") && tag.as_deref() == Some("custom:v1")));
+    }
 }
+

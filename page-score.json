@@ -1,14 +1,14 @@
 {
  "repo": "modeld",
- "rev": "974c662",
+ "rev": "0fa9195",
  "dirty": true,
  "pages": [
   {
    "path": "./crates/modelctl/src/client.rs",
    "lines": 66,
-   "bin_bytes": 3549,
+   "bin_bytes": 3674,
    "heat_pct": null,
-   "reach": 8
+   "reach": 9
   },
   {
    "path": "./crates/modelctl/src/cmd/completions.rs",
@@ -40,7 +40,7 @@
   },
   {
    "path": "./crates/modelctl/src/cmd/mod.rs",
-   "lines": 15,
+   "lines": 18,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -60,6 +60,34 @@
    "reach": 1
   },
   {
+   "path": "./crates/modelctl/src/cmd/pull/mod.rs",
+   "lines": 7,
+   "bin_bytes": null,
+   "heat_pct": null,
+   "reach": 0
+  },
+  {
+   "path": "./crates/modelctl/src/cmd/pull/progress.rs",
+   "lines": 28,
+   "bin_bytes": 831,
+   "heat_pct": null,
+   "reach": 1
+  },
+  {
+   "path": "./crates/modelctl/src/cmd/pull/resolve.rs",
+   "lines": 188,
+   "bin_bytes": 14766,
+   "heat_pct": null,
+   "reach": 1
+  },
+  {
+   "path": "./crates/modelctl/src/cmd/pull/stream.rs",
+   "lines": 168,
+   "bin_bytes": 9381,
+   "heat_pct": null,
+   "reach": 1
+  },
+  {
    "path": "./crates/modelctl/src/lib.rs",
    "lines": 7,
    "bin_bytes": null,
@@ -68,7 +96,7 @@
   },
   {
    "path": "./crates/modelctl/src/main.rs",
-   "lines": 167,
+   "lines": 212,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -78,7 +106,7 @@
    "lines": 75,
    "bin_bytes": 507,
    "heat_pct": null,
-   "reach": 3
+   "reach": 4
   },
   {
    "path": "./crates/modeld-core/src/cas/digest.rs",
@@ -120,7 +148,7 @@
    "lines": 246,
    "bin_bytes": 11283,
    "heat_pct": null,
-   "reach": 2
+   "reach": 3
   },
   {
    "path": "./crates/modeld-core/src/config/modeld_config.rs",
@@ -139,7 +167,7 @@
   {
    "path": "./crates/modeld-core/src/descriptor/fd_pass.rs",
    "lines": 63,
-   "bin_bytes": null,
+   "bin_bytes": 936,
    "heat_pct": null,
    "reach": 1
   },
@@ -160,14 +188,14 @@
   {
    "path": "./crates/modeld-core/src/error.rs",
    "lines": 107,
-   "bin_bytes": 1692,
+   "bin_bytes": 2417,
    "heat_pct": null,
    "reach": 14
   },
   {
    "path": "./crates/modeld-core/src/format/gguf.rs",
    "lines": 205,
-   "bin_bytes": 284,
+   "bin_bytes": 11758,
    "heat_pct": null,
    "reach": 1
   },
@@ -249,15 +277,22 @@
    "reach": 2
   },
   {
-   "path": "./crates/modeld-daemon/src/varlink/model1.rs",
-   "lines": 234,
-   "bin_bytes": 26729,
+   "path": "./crates/modeld-daemon/src/varlink/inspect.rs",
+   "lines": 97,
+   "bin_bytes": 9176,
    "heat_pct": null,
    "reach": 2
   },
   {
+   "path": "./crates/modeld-daemon/src/varlink/model1.rs",
+   "lines": 178,
+   "bin_bytes": 19546,
+   "heat_pct": null,
+   "reach": 4
+  },
+  {
    "path": "./crates/modeld-daemon/src/varlink/mod.rs",
-   "lines": 13,
+   "lines": 18,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -267,7 +302,14 @@
    "lines": 97,
    "bin_bytes": 7515,
    "heat_pct": null,
-   "reach": 4
+   "reach": 6
+  },
+  {
+   "path": "./crates/modeld-daemon/src/varlink/register.rs",
+   "lines": 143,
+   "bin_bytes": 18997,
+   "heat_pct": null,
+   "reach": 2
   },
   {
    "path": "./crates/modeld-daemon/src/varlink/server.rs",
@@ -278,7 +320,7 @@
   },
   {
    "path": "./crates/modeld-daemon/src/varlink/service.rs",
-   "lines": 88,
+   "lines": 90,
    "bin_bytes": 6092,
    "heat_pct": null,
    "reach": 2
@@ -420,7 +462,7 @@
    "path": "./qa/unit/src/lib.rs",
    "lines": 14,
    "bin_bytes": null,
-   "heat_pct": 9.09,
+   "heat_pct": null,
    "reach": 0
   },
   {
@@ -467,11 +509,11 @@
   },
   {
    "path": "./qa/unit/src/varlink/varlink_tests.rs",
-   "lines": 90,
+   "lines": 129,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
   }
  ],
- "notes": "reach counts referencing files (shared file names qualified by ancestor dir); bin_bytes from newest workspace dev rlib per crate via nm (inlining approx, bins re-link the same code; shims excluded, foreign paths never attributed); heat from 132 attributed samples over 12/99 binaries at 10Hz incl. one child level; every repo-resolving frame counts;"
+ "notes": "reach counts referencing files (shared file names qualified by ancestor dir); bin_bytes from newest workspace dev rlib per crate via nm (inlining approx, bins re-link the same code; shims excluded, foreign paths never attributed);"
 }

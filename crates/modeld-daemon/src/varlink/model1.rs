@@ -1,8 +1,10 @@
 //! Implementation of io.syntrop.Model1 Varlink interface.
 //!
-//! Exposes model catalog listing, inspection, pinning, and storage pruning.
+//! Exposes model catalog listing, inspection, registration, pinning, and storage pruning.
 
+use super::inspect::{handle_inspect, resolve_digest, ResolveOutcome};
 use super::protocol::VarlinkReply;
+use super::register::handle_register;
 use modeld_core::cas::{CasStore, EvictionManager, TagRegistry};
 use serde_json::json;
 use std::fs;
@@ -29,6 +31,7 @@ pub fn handle_model1_call(
     match method {
         "io.syntrop.Model1.List" => Some(handle_list(ctx)),
         "io.syntrop.Model1.Inspect" => Some(handle_inspect(params, ctx)),
+        "io.syntrop.Model1.Register" => Some(handle_register(params, ctx)),
         "io.syntrop.Model1.Pin" => Some(handle_pin(params, ctx)),
         "io.syntrop.Model1.Unpin" => Some(handle_unpin(params, ctx)),
         "io.syntrop.Model1.Prune" => Some(handle_prune(params, ctx)),
@@ -60,46 +63,6 @@ fn handle_list(ctx: &ModelServiceContext) -> VarlinkReply {
     }
 
     VarlinkReply::ok(json!({ "models": entries }))
-}
-
-fn handle_inspect(params: Option<&serde_json::Value>, ctx: &ModelServiceContext) -> VarlinkReply {
-    let id = match params.and_then(|p| p.get("id")).and_then(|v| v.as_str()) {
-        Some(s) => s,
-        None => return VarlinkReply::err("io.syntrop.Model1.InvalidIdentifier", None),
-    };
-
-    let digest = match resolve_digest(&ctx.tags, id) {
-        ResolveOutcome::Ok(d) => d,
-        ResolveOutcome::Invalid => {
-            return VarlinkReply::err(
-                "io.syntrop.Model1.InvalidIdentifier",
-                Some(json!({ "id": id })),
-            );
-        }
-        ResolveOutcome::NotFound => {
-            return VarlinkReply::err(
-                "io.syntrop.Model1.NoSuchModel",
-                Some(json!({ "id": id })),
-            );
-        }
-    };
-
-    let size = ctx.cas.blob_size(&digest).unwrap_or_else(|e| {
-        warn!("blob_size failed for digest {}: {}", digest, e);
-        0
-    });
-    let pinned = ctx.eviction.is_pinned(&digest);
-
-    VarlinkReply::ok(json!({
-        "info": {
-            "id": id,
-            "digest": digest,
-            "size_bytes": size,
-            "pinned": pinned,
-            "format": "gguf"
-        },
-        "metadata": format!("Digest: {}", digest)
-    }))
 }
 
 fn handle_pin(params: Option<&serde_json::Value>, ctx: &ModelServiceContext) -> VarlinkReply {
@@ -161,25 +124,6 @@ fn handle_unpin(params: Option<&serde_json::Value>, ctx: &ModelServiceContext) -
             "io.syntrop.Model1.OperationFailed",
             Some(json!({ "reason": e.to_string() })),
         ),
-    }
-}
-
-/// Distinguishes the three outcomes of resolving a user-supplied identifier:
-/// found, well-formed-but-unknown, and rejected as unsafe.
-enum ResolveOutcome {
-    Ok(String),
-    Invalid,
-    NotFound,
-}
-
-/// Resolves an identifier to a digest, distinguishing "rejected by segment
-/// validation" from "no such model" so the daemon can return the correct
-/// Varlink error code.
-fn resolve_digest(tags: &TagRegistry, id: &str) -> ResolveOutcome {
-    match tags.resolve(id) {
-        Ok(Some(d)) => ResolveOutcome::Ok(d),
-        Ok(None) => ResolveOutcome::NotFound,
-        Err(_) => ResolveOutcome::Invalid,
     }
 }
 
