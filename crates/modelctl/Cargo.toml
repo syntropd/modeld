@@ -20,7 +20,7 @@ anyhow.workspace = true
 clap.workspace = true
 clap_complete.workspace = true
 indicatif = "0.18"
-modeld-core = { package = "syntrop-modeld-core", version = "0.3.1", path = "../modeld-core" }
+modeld-core = { package = "syntrop-modeld-core", version = "0.3.2", path = "../modeld-core" }
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream", "json"] }
 sha2.workspace = true
 serde.workspace = true
