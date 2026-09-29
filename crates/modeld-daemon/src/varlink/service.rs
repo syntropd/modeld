@@ -41,6 +41,7 @@ type ModelEntry (
 
 method List() -> (models: []ModelEntry)
 method Inspect(id: string) -> (info: ModelEntry, metadata: ?string)
+method Register(id: string, tag: ?string, digest: ?string) -> (entry: ModelEntry, metadata: ?string)
 method Pin(id: string) -> ()
 method Unpin(id: string) -> ()
 method Prune(max_bytes: int) -> (reclaimed_bytes: int)
@@ -48,6 +49,7 @@ method GetStorageStats() -> (total_bytes: int, model_count: int, pinned_count: i
 
 error NoSuchModel(id: string)
 error InvalidIdentifier(id: string)
+error InvalidParameter(parameter: string, reason: string)
 error OperationFailed(reason: string)
 "#;
 

@@ -88,3 +88,42 @@ fn test_varlink_model1_unknown_identifier_is_no_such_model() {
         Some("io.syntrop.Model1.NoSuchModel")
     );
 }
+
+#[test]
+fn test_varlink_model1_register_success_and_errors() {
+    let dir = tempdir().unwrap();
+    let cas = Arc::new(CasStore::new(dir.path()).unwrap());
+    let tags = Arc::new(TagRegistry::new(dir.path()).unwrap());
+    let eviction = Arc::new(EvictionManager::new(dir.path()).unwrap());
+    let ctx = ModelServiceContext { cas, tags, eviction };
+
+    let digest = "ab".repeat(32);
+    let params = json!({
+        "id": "qwen2.5:0.5b",
+        "digest": digest
+    });
+    let reply = handle_model1_call("io.syntrop.Model1.Register", Some(&params), &ctx).unwrap();
+    assert!(reply.error.is_none());
+    let out = reply.parameters.unwrap();
+    let entry = out.get("entry").unwrap();
+    assert_eq!(entry.get("name").and_then(|v| v.as_str()), Some("qwen2.5"));
+    assert_eq!(entry.get("tag").and_then(|v| v.as_str()), Some("0.5b"));
+    assert_eq!(entry.get("digest").and_then(|v| v.as_str()), Some(digest.as_str()));
+
+    // Invalid identifier
+    let invalid_id_params = json!({
+        "id": "bad/model:tag",
+        "digest": digest
+    });
+    let reply = handle_model1_call("io.syntrop.Model1.Register", Some(&invalid_id_params), &ctx).unwrap();
+    assert_eq!(reply.error.as_deref(), Some("io.syntrop.Model1.InvalidIdentifier"));
+
+    // Invalid digest
+    let invalid_digest_params = json!({
+        "id": "qwen2.5:0.5b",
+        "digest": "invalid-digest"
+    });
+    let reply = handle_model1_call("io.syntrop.Model1.Register", Some(&invalid_digest_params), &ctx).unwrap();
+    assert_eq!(reply.error.as_deref(), Some("io.syntrop.Model1.InvalidParameter"));
+}
+
