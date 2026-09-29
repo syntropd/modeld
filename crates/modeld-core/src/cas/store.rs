@@ -52,9 +52,13 @@ impl CasStore {
         if standard.is_file() {
             return standard;
         }
-        let flat = self.cas_dir().join(format!("sha256-{}.gguf", digest));
-        if flat.is_file() {
-            return flat;
+        let flat_gguf = self.cas_dir().join(format!("sha256-{}.gguf", digest));
+        if flat_gguf.is_file() {
+            return flat_gguf;
+        }
+        let flat_st = self.cas_dir().join(format!("sha256-{}.safetensors", digest));
+        if flat_st.is_file() {
+            return flat_st;
         }
         standard
     }

@@ -72,6 +72,10 @@ pub enum Commands {
         /// Model alias or Hugging Face repository (e.g. "qwen2.5:0.5b" or "org/repo").
         model: String,
 
+        /// Target model format: gguf or safetensors.
+        #[arg(long, default_value = "gguf")]
+        format: String,
+
         /// Quantization filter (e.g. "Q4_K_M").
         #[arg(long)]
         quant: Option<String>,
@@ -122,6 +126,7 @@ async fn main() -> anyhow::Result<()> {
         }
         Commands::Pull {
             model,
+            format,
             quant,
             tag,
             force,
@@ -130,6 +135,7 @@ async fn main() -> anyhow::Result<()> {
                 &cli.storage_path,
                 &cli.socket,
                 &model,
+                &format,
                 quant.as_deref(),
                 tag.as_deref(),
                 force,
@@ -203,10 +209,10 @@ mod tests {
     #[test]
     fn test_cli_pull_options() {
         let cli = parse(&["modelctl", "pull", "qwen2.5:0.5b"]);
-        assert!(matches!(cli.command, Commands::Pull { ref model, force: false, .. } if model == "qwen2.5:0.5b"));
-        let cli = parse(&["modelctl", "pull", "org/repo", "--quant", "Q4_K_M", "--tag", "custom:v1", "--force"]);
-        assert!(matches!(cli.command, Commands::Pull { ref model, ref quant, ref tag, force: true }
-            if model == "org/repo" && quant.as_deref() == Some("Q4_K_M") && tag.as_deref() == Some("custom:v1")));
+        assert!(matches!(cli.command, Commands::Pull { ref model, ref format, force: false, .. } if model == "qwen2.5:0.5b" && format == "gguf"));
+        let cli = parse(&["modelctl", "pull", "org/repo", "--format", "safetensors", "--quant", "Q4_K_M", "--tag", "custom:v1", "--force"]);
+        assert!(matches!(cli.command, Commands::Pull { ref model, ref format, ref quant, ref tag, force: true }
+            if model == "org/repo" && format == "safetensors" && quant.as_deref() == Some("Q4_K_M") && tag.as_deref() == Some("custom:v1")));
     }
 }
 

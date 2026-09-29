@@ -1,7 +1,8 @@
 //! Streaming model downloader with in-flight SHA-256 calculation and CAS commitment.
 
+use super::commit_artifact::{commit_artifact, commit_tokenizer, ArtifactCommit};
 use super::progress::create_download_progress;
-use super::resolve::resolve_model;
+use super::resolve::resolve_model_with_format;
 use crate::client::VarlinkClient;
 use anyhow::{anyhow, Context, Result};
 use reqwest::Client;
@@ -19,6 +20,7 @@ pub async fn run_pull<P: AsRef<Path>>(
     storage_root: P,
     socket_path: P,
     model_spec: &str,
+    format: &str,
     quant: Option<&str>,
     tag_override: Option<&str>,
     force: bool,
@@ -28,8 +30,8 @@ pub async fn run_pull<P: AsRef<Path>>(
         .build()
         .context("Failed to build HTTP client")?;
 
-    println!("Resolving model: {}", model_spec);
-    let resolved = resolve_model(&client, model_spec, quant, tag_override).await?;
+    println!("Resolving model: {} (format: {})", model_spec, format);
+    let resolved = resolve_model_with_format(&client, model_spec, format, quant, tag_override).await?;
     println!("  Target: {}:{}", resolved.name, resolved.tag);
     println!("  Source: {}", resolved.download_url);
 
@@ -40,7 +42,8 @@ pub async fn run_pull<P: AsRef<Path>>(
     if tag_file.is_file() && !force {
         let existing_digest = fs::read_to_string(&tag_file).unwrap_or_default();
         let digest_trim = existing_digest.trim();
-        let flat_dest = cas_dir.join(format!("sha256-{}.gguf", digest_trim));
+        let ext = if resolved.format.eq_ignore_ascii_case("safetensors") { "safetensors" } else { "gguf" };
+        let flat_dest = cas_dir.join(format!("sha256-{}.{}", digest_trim, ext));
         let blob_dest = cas_dir.join("blobs").join("sha256").join(digest_trim);
         if flat_dest.is_file() || blob_dest.is_file() {
             println!(
@@ -114,46 +117,31 @@ pub async fn run_pull<P: AsRef<Path>>(
     let digest = format!("{:x}", hasher.finalize());
     println!("  SHA-256: {}", digest);
 
-    // Commit to CAS: /var/lib/models/cas/sha256-<digest>.gguf
-    let cas_filename = format!("sha256-{}.gguf", digest);
-    let cas_dest = cas_dir.join(&cas_filename);
+    let commit = ArtifactCommit {
+        storage_root: root,
+        stage_path: &stage_path,
+        digest: &digest,
+        format: &resolved.format,
+        name: &resolved.name,
+        tag: &resolved.tag,
+    };
     guard.active = false;
-    fs::rename(&stage_path, &cas_dest).context("Failed to commit CAS artifact")?;
+    commit_artifact(&commit)?;
 
-    // Maintain standard CAS blob path compatibility: cas/blobs/sha256/<digest>
-    let blob_dir = cas_dir.join("blobs").join("sha256");
-    if fs::create_dir_all(&blob_dir).is_ok() {
-        let blob_path = blob_dir.join(&digest);
-        let _ = fs::remove_file(&blob_path);
-        if fs::hard_link(&cas_dest, &blob_path).is_err() {
-            let _ = fs::copy(&cas_dest, &blob_path);
+    if let Some(tok_url) = &resolved.tokenizer_url {
+        println!("  Downloading companion tokenizer.json...");
+        if let Ok(tok_resp) = client.get(tok_url).send().await {
+            if tok_resp.status().is_success() {
+                if let Ok(bytes) = tok_resp.bytes().await {
+                    let _ = commit_tokenizer(root, &resolved.name, &bytes);
+                    println!("  Companion tokenizer.json saved");
+                }
+            }
         }
     }
 
-    // Write plain text tag: /var/lib/models/tags/<name>/<tag>
-    let tag_dir = root.join("tags").join(&resolved.name);
-    fs::create_dir_all(&tag_dir).context("Failed to create tags directory")?;
-    fs::write(&tag_file, digest.as_bytes()).context("Failed to write tag file")?;
-
-    // Create symlink: /var/lib/models/gguf/<name>.gguf
-    let gguf_dir = root.join("gguf");
-    fs::create_dir_all(&gguf_dir).context("Failed to create gguf directory")?;
-    let symlink_dest = gguf_dir.join(format!("{}.gguf", resolved.name));
-    let _ = fs::remove_file(&symlink_dest);
-
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::symlink;
-        let link_target = fs::canonicalize(&cas_dest).unwrap_or_else(|_| cas_dest.clone());
-        if let Err(e) = symlink(&link_target, &symlink_dest) {
-            warn!("Failed to create symlink at {:?}: {}", symlink_dest, e);
-        }
-    }
-
-    // Register with modeld via Varlink if daemon is listening
     register_with_modeld(socket_path.as_ref(), &resolved.name, &resolved.tag, &digest);
 
-    // Notify routerd of new model via Reload Varlink method
     let router_socket =
         std::env::var("SYNTROP_ROUTER_SOCKET").unwrap_or_else(|_| ROUTER_SOCKET.to_string());
     notify_router_reload(Path::new(&router_socket));

@@ -12,6 +12,10 @@ use std::io::Read;
 pub struct SafeTensorsMetadata {
     /// Total number of individual tensors declared in the header.
     pub tensor_count: usize,
+    /// Total parameter count summed from tensor shapes.
+    pub parameter_count: u64,
+    /// Model architecture detected or specified in metadata.
+    pub architecture: Option<String>,
     /// Model format metadata attributes.
     pub attributes: HashMap<String, String>,
 }
@@ -55,24 +59,52 @@ pub fn parse_safetensors_header<R: Read>(mut reader: R) -> Result<SafeTensorsMet
     })?;
 
     let mut tensor_count = 0;
+    let mut parameter_count: u64 = 0;
     let mut attributes = HashMap::new();
+    let mut architecture = None;
 
     for (k, v) in obj {
         if k == "__metadata__" {
             if let Some(meta_obj) = v.as_object() {
                 for (mk, mv) in meta_obj {
-                    if let Some(s) = mv.as_str() {
-                        attributes.insert(mk.clone(), s.to_string());
-                    }
+                    let val_str = match mv {
+                        serde_json::Value::String(s) => s.clone(),
+                        serde_json::Value::Number(n) => n.to_string(),
+                        serde_json::Value::Bool(b) => b.to_string(),
+                        other => other.to_string(),
+                    };
+                    attributes.insert(mk.clone(), val_str);
                 }
             }
         } else {
             tensor_count += 1;
+            if let Some(tensor_obj) = v.as_object() {
+                if let Some(shape_arr) = tensor_obj.get("shape").and_then(|s| s.as_array()) {
+                    let mut prod: u64 = 1;
+                    for dim in shape_arr {
+                        if let Some(d) = dim.as_u64() {
+                            prod = prod.saturating_mul(d);
+                        }
+                    }
+                    parameter_count = parameter_count.saturating_add(prod);
+                }
+            }
         }
+    }
+
+    if let Some(arch) = attributes
+        .get("architecture")
+        .or_else(|| attributes.get("models.model_type"))
+        .or_else(|| attributes.get("model_type"))
+        .or_else(|| attributes.get("general.architecture"))
+    {
+        architecture = Some(arch.clone());
     }
 
     Ok(SafeTensorsMetadata {
         tensor_count,
+        parameter_count,
+        architecture,
         attributes,
     })
 }

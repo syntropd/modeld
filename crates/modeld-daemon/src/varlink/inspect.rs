@@ -56,32 +56,55 @@ pub fn handle_inspect(params: Option<&serde_json::Value>, ctx: &ModelServiceCont
     });
     let pinned = ctx.eviction.is_pinned(&digest);
 
-    let metadata_str = match ctx.cas.open_blob(&digest) {
-        Ok(file) => match modeld_core::format::parse_gguf_header(file) {
-            Ok(meta) => {
-                let arch = meta.architecture.as_deref().unwrap_or("unknown");
-                let param_count = meta
-                    .attributes
-                    .get("general.parameter_count")
-                    .or_else(|| {
-                        meta.architecture
-                            .as_ref()
-                            .and_then(|a| meta.attributes.get(&format!("{}.parameter_count", a)))
-                    })
-                    .cloned()
-                    .unwrap_or_else(|| meta.tensor_count.to_string());
-                let context_len = meta
-                    .context_length
-                    .map(|c| c.to_string())
-                    .unwrap_or_else(|| "unknown".to_string());
-                format!(
-                    "architecture: {}, parameter_count: {}, context_length: {}",
-                    arch, param_count, context_len
-                )
+    let (format_str, metadata_str) = match ctx.cas.open_blob(&digest) {
+        Ok(mut file) => {
+            let safe_fmt = modeld_core::format::detect_safe_format(&mut file).ok();
+            use std::io::Seek;
+            let _ = file.seek(std::io::SeekFrom::Start(0));
+            match safe_fmt {
+                Some(modeld_core::format::SafeFormat::SafeTensors) => {
+                    let meta = match modeld_core::format::parse_safetensors_header(file) {
+                        Ok(meta) => {
+                            let arch = meta.architecture.as_deref().unwrap_or("unknown");
+                            format!(
+                                "architecture: {}, parameter_count: {}, tensor_count: {}",
+                                arch, meta.parameter_count, meta.tensor_count
+                            )
+                        }
+                        Err(_) => format!("Digest: {}", digest),
+                    };
+                    ("safetensors", meta)
+                }
+                _ => {
+                    let meta = match modeld_core::format::parse_gguf_header(file) {
+                        Ok(meta) => {
+                            let arch = meta.architecture.as_deref().unwrap_or("unknown");
+                            let param_count = meta
+                                .attributes
+                                .get("general.parameter_count")
+                                .or_else(|| {
+                                    meta.architecture
+                                        .as_ref()
+                                        .and_then(|a| meta.attributes.get(&format!("{}.parameter_count", a)))
+                                })
+                                .cloned()
+                                .unwrap_or_else(|| meta.tensor_count.to_string());
+                            let context_len = meta
+                                .context_length
+                                .map(|c| c.to_string())
+                                .unwrap_or_else(|| "unknown".to_string());
+                            format!(
+                                "architecture: {}, parameter_count: {}, context_length: {}",
+                                arch, param_count, context_len
+                            )
+                        }
+                        Err(_) => format!("Digest: {}", digest),
+                    };
+                    ("gguf", meta)
+                }
             }
-            Err(_) => format!("Digest: {}", digest),
-        },
-        Err(_) => format!("Digest: {}", digest),
+        }
+        Err(_) => ("gguf", format!("Digest: {}", digest)),
     };
 
     VarlinkReply::ok(json!({
@@ -90,7 +113,7 @@ pub fn handle_inspect(params: Option<&serde_json::Value>, ctx: &ModelServiceCont
             "digest": digest,
             "size_bytes": size,
             "pinned": pinned,
-            "format": "gguf"
+            "format": format_str
         },
         "metadata": metadata_str
     }))

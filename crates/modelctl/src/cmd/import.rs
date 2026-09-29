@@ -22,10 +22,22 @@ pub fn run_import<P: AsRef<Path>>(
     let cas = CasStore::new(storage_root.as_ref())?;
     let tags = TagRegistry::new(storage_root.as_ref())?;
 
-    let file = File::open(src)?;
+    let mut file = File::open(src)?;
+    let detected_format = match modeld_core::format::detect_safe_format(&mut file) {
+        Err(modeld_core::error::ModeldError::SecurityRejection(reason)) => {
+            return Err(anyhow!("Security rejection: {}", reason));
+        }
+        Ok(fmt) => Some(fmt),
+        Err(_) => None,
+    };
+    use std::io::Seek;
+    file.seek(std::io::SeekFrom::Start(0))?;
     let (digest, total_bytes) = cas.store_blob(file, None)?;
 
     println!("Imported {:?} into CAS store.", src);
+    if let Some(fmt) = detected_format {
+        println!("  Format:  {:?}", fmt);
+    }
     println!("  SHA-256: {}", digest);
     println!("  Size:    {} bytes", total_bytes);
 

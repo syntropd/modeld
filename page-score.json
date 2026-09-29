@@ -1,25 +1,25 @@
 {
  "repo": "modeld",
- "rev": "bf3fd74",
- "dirty": false,
+ "rev": "9378d86",
+ "dirty": true,
  "pages": [
   {
    "path": "./crates/modelctl/src/client.rs",
    "lines": 66,
-   "bin_bytes": 3674,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 9
   },
   {
    "path": "./crates/modelctl/src/cmd/completions.rs",
    "lines": 58,
-   "bin_bytes": 802,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 1
   },
   {
    "path": "./crates/modelctl/src/cmd/import.rs",
-   "lines": 48,
+   "lines": 60,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 1
@@ -27,14 +27,14 @@
   {
    "path": "./crates/modelctl/src/cmd/inspect.rs",
    "lines": 30,
-   "bin_bytes": 2843,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 1
   },
   {
    "path": "./crates/modelctl/src/cmd/list.rs",
    "lines": 81,
-   "bin_bytes": 3951,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 1
   },
@@ -48,20 +48,27 @@
   {
    "path": "./crates/modelctl/src/cmd/pin.rs",
    "lines": 19,
-   "bin_bytes": 2168,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 1
   },
   {
    "path": "./crates/modelctl/src/cmd/prune.rs",
    "lines": 31,
-   "bin_bytes": 1279,
+   "bin_bytes": null,
+   "heat_pct": null,
+   "reach": 1
+  },
+  {
+   "path": "./crates/modelctl/src/cmd/pull/commit_artifact.rs",
+   "lines": 73,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 1
   },
   {
    "path": "./crates/modelctl/src/cmd/pull/mod.rs",
-   "lines": 7,
+   "lines": 8,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -69,21 +76,42 @@
   {
    "path": "./crates/modelctl/src/cmd/pull/progress.rs",
    "lines": 28,
-   "bin_bytes": 831,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 1
   },
   {
-   "path": "./crates/modelctl/src/cmd/pull/resolve.rs",
-   "lines": 220,
-   "bin_bytes": 15338,
+   "path": "./crates/modelctl/src/cmd/pull/resolve/alias.rs",
+   "lines": 51,
+   "bin_bytes": null,
    "heat_pct": null,
-   "reach": 2
+   "reach": 1
+  },
+  {
+   "path": "./crates/modelctl/src/cmd/pull/resolve/hf_tree.rs",
+   "lines": 104,
+   "bin_bytes": null,
+   "heat_pct": null,
+   "reach": 1
+  },
+  {
+   "path": "./crates/modelctl/src/cmd/pull/resolve/mod.rs",
+   "lines": 85,
+   "bin_bytes": null,
+   "heat_pct": null,
+   "reach": 0
+  },
+  {
+   "path": "./crates/modelctl/src/cmd/pull/resolve/select.rs",
+   "lines": 72,
+   "bin_bytes": null,
+   "heat_pct": null,
+   "reach": 1
   },
   {
    "path": "./crates/modelctl/src/cmd/pull/stream.rs",
-   "lines": 203,
-   "bin_bytes": 9440,
+   "lines": 191,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 1
   },
@@ -96,7 +124,7 @@
   },
   {
    "path": "./crates/modelctl/src/main.rs",
-   "lines": 212,
+   "lines": 218,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -104,7 +132,7 @@
   {
    "path": "./crates/modeld-core/src/cas/digest_format.rs",
    "lines": 75,
-   "bin_bytes": 507,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 4
   },
@@ -118,7 +146,7 @@
   {
    "path": "./crates/modeld-core/src/cas/eviction.rs",
    "lines": 149,
-   "bin_bytes": 9787,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 2
   },
@@ -138,22 +166,22 @@
   },
   {
    "path": "./crates/modeld-core/src/cas/store.rs",
-   "lines": 145,
-   "bin_bytes": 3219,
+   "lines": 149,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 3
   },
   {
    "path": "./crates/modeld-core/src/cas/tags.rs",
    "lines": 246,
-   "bin_bytes": 11283,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 3
   },
   {
    "path": "./crates/modeld-core/src/config/modeld_config.rs",
    "lines": 59,
-   "bin_bytes": 307,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 1
   },
@@ -167,7 +195,7 @@
   {
    "path": "./crates/modeld-core/src/descriptor/fd_pass.rs",
    "lines": 63,
-   "bin_bytes": 936,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 1
   },
@@ -181,21 +209,21 @@
   {
    "path": "./crates/modeld-core/src/descriptor/sealed_fd.rs",
    "lines": 112,
-   "bin_bytes": 4162,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 1
   },
   {
    "path": "./crates/modeld-core/src/error.rs",
    "lines": 107,
-   "bin_bytes": 2417,
+   "bin_bytes": null,
    "heat_pct": null,
-   "reach": 14
+   "reach": 16
   },
   {
    "path": "./crates/modeld-core/src/format/gguf.rs",
    "lines": 205,
-   "bin_bytes": 11758,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 1
   },
@@ -208,15 +236,15 @@
   },
   {
    "path": "./crates/modeld-core/src/format/safetensors.rs",
-   "lines": 78,
-   "bin_bytes": 100,
+   "lines": 110,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 1
   },
   {
    "path": "./crates/modeld-core/src/format/validator.rs",
-   "lines": 158,
-   "bin_bytes": 178,
+   "lines": 197,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 2
   },
@@ -237,21 +265,21 @@
   {
    "path": "./crates/modeld-daemon/src/activation.rs",
    "lines": 161,
-   "bin_bytes": 2264,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 2
   },
   {
    "path": "./crates/modeld-daemon/src/auth.rs",
    "lines": 229,
-   "bin_bytes": 3041,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 4
   },
   {
    "path": "./crates/modeld-daemon/src/fd_server.rs",
    "lines": 201,
-   "bin_bytes": 28994,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 3
   },
@@ -272,21 +300,21 @@
   {
    "path": "./crates/modeld-daemon/src/notify.rs",
    "lines": 197,
-   "bin_bytes": 2513,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 2
   },
   {
    "path": "./crates/modeld-daemon/src/varlink/inspect.rs",
-   "lines": 97,
-   "bin_bytes": 9176,
+   "lines": 120,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 2
   },
   {
    "path": "./crates/modeld-daemon/src/varlink/model1.rs",
-   "lines": 203,
-   "bin_bytes": 21589,
+   "lines": 210,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 4
   },
@@ -300,28 +328,28 @@
   {
    "path": "./crates/modeld-daemon/src/varlink/protocol.rs",
    "lines": 97,
-   "bin_bytes": 7515,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 6
   },
   {
    "path": "./crates/modeld-daemon/src/varlink/register.rs",
-   "lines": 150,
-   "bin_bytes": 19576,
+   "lines": 185,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 2
   },
   {
    "path": "./crates/modeld-daemon/src/varlink/server.rs",
    "lines": 157,
-   "bin_bytes": 17916,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 4
   },
   {
    "path": "./crates/modeld-daemon/src/varlink/service.rs",
-   "lines": 90,
-   "bin_bytes": 6092,
+   "lines": 91,
+   "bin_bytes": null,
    "heat_pct": null,
    "reach": 2
   },
@@ -522,5 +550,5 @@
    "reach": 0
   }
  ],
- "notes": "reach counts referencing files (shared file names qualified by ancestor dir); bin_bytes from newest workspace dev rlib per crate via nm (inlining approx, bins re-link the same code; shims excluded, foreign paths never attributed);"
+ "notes": "reach counts referencing files (shared file names qualified by ancestor dir);"
 }

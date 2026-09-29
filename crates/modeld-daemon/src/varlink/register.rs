@@ -102,36 +102,71 @@ pub fn handle_register(
     });
     let pinned = ctx.eviction.is_pinned(&clean_digest);
 
-    let metadata_str = match ctx.cas.open_blob(&clean_digest) {
-        Ok(file) => match modeld_core::format::parse_gguf_header(file) {
-            Ok(meta) => {
-                let arch = meta.architecture.as_deref().unwrap_or("unknown");
-                let param_count = meta
-                    .attributes
-                    .get("general.parameter_count")
-                    .or_else(|| {
-                        meta.architecture
-                            .as_ref()
-                            .and_then(|a| meta.attributes.get(&format!("{}.parameter_count", a)))
-                    })
-                    .cloned()
-                    .unwrap_or_else(|| meta.tensor_count.to_string());
-                let context_len = meta
-                    .context_length
-                    .map(|c| c.to_string())
-                    .unwrap_or_else(|| "unknown".to_string());
-                Some(format!(
-                    "architecture: {}, parameter_count: {}, context_length: {}",
-                    arch, param_count, context_len
-                ))
+    let mut format_str = "gguf";
+    let mut metadata_str = Some(format!("Digest: {}", clean_digest));
+
+    if let Ok(mut blob_file) = ctx.cas.open_blob(&clean_digest) {
+        match modeld_core::format::detect_safe_format(&mut blob_file) {
+            Err(modeld_core::error::ModeldError::SecurityRejection(reason)) => {
+                return VarlinkReply::err(
+                    "io.syntrop.Model1.SecurityRejection",
+                    Some(json!({ "reason": reason })),
+                );
             }
-            Err(e) => {
-                warn!("GGUF header parse failed for {}: {}", clean_digest, e);
-                Some(format!("Digest: {}", clean_digest))
+            Ok(modeld_core::format::SafeFormat::SafeTensors) => {
+                use std::io::Seek;
+                let _ = blob_file.seek(std::io::SeekFrom::Start(0));
+                let meta_str = match modeld_core::format::parse_safetensors_header(blob_file) {
+                    Ok(meta) => {
+                        let arch = meta.architecture.as_deref().unwrap_or("unknown");
+                        Some(format!(
+                            "architecture: {}, parameter_count: {}, tensor_count: {}",
+                            arch, meta.parameter_count, meta.tensor_count
+                        ))
+                    }
+                    Err(e) => {
+                        warn!("SafeTensors header parse failed for {}: {}", clean_digest, e);
+                        Some(format!("Digest: {}", clean_digest))
+                    }
+                };
+                format_str = "safetensors";
+                metadata_str = meta_str;
             }
-        },
-        Err(_) => Some(format!("Digest: {}", clean_digest)),
-    };
+            _ => {
+                use std::io::Seek;
+                let _ = blob_file.seek(std::io::SeekFrom::Start(0));
+                let meta_str = match modeld_core::format::parse_gguf_header(blob_file) {
+                    Ok(meta) => {
+                        let arch = meta.architecture.as_deref().unwrap_or("unknown");
+                        let param_count = meta
+                            .attributes
+                            .get("general.parameter_count")
+                            .or_else(|| {
+                                meta.architecture
+                                    .as_ref()
+                                    .and_then(|a| meta.attributes.get(&format!("{}.parameter_count", a)))
+                            })
+                            .cloned()
+                            .unwrap_or_else(|| meta.tensor_count.to_string());
+                        let context_len = meta
+                            .context_length
+                            .map(|c| c.to_string())
+                            .unwrap_or_else(|| "unknown".to_string());
+                        Some(format!(
+                            "architecture: {}, parameter_count: {}, context_length: {}",
+                            arch, param_count, context_len
+                        ))
+                    }
+                    Err(e) => {
+                        warn!("GGUF header parse failed for {}: {}", clean_digest, e);
+                        Some(format!("Digest: {}", clean_digest))
+                    }
+                };
+                format_str = "gguf";
+                metadata_str = meta_str;
+            }
+        }
+    }
 
     let entry = json!({
         "id": format!("{}:{}", name, tag),
@@ -140,7 +175,7 @@ pub fn handle_register(
         "tag": tag,
         "size_bytes": size,
         "pinned": pinned,
-        "format": "gguf"
+        "format": format_str
     });
 
     VarlinkReply::ok(json!({

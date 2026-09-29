@@ -51,6 +51,7 @@ error NoSuchModel(id: string)
 error InvalidIdentifier(id: string)
 error InvalidParameter(parameter: string, reason: string)
 error OperationFailed(reason: string)
+error SecurityRejection(reason: string)
 "#;
 
 /// Handles standard org.varlink.service method dispatches.

@@ -25,6 +25,12 @@ pub fn validate_file_safety<P: AsRef<Path>>(path: P) -> Result<(), ModeldError> 
     if let Some(ext) = path.as_ref().extension().and_then(|s| s.to_str()) {
         let ext_lower = ext.to_lowercase();
         if BANNED_EXTENSIONS.contains(&ext_lower.as_str()) {
+            tracing::error!(
+                target: "security_alert",
+                incident = "UNSAFE_MODEL_FORMAT_REJECTED",
+                reason = "Banned file extension",
+                extension = %ext,
+            );
             return Err(ModeldError::SecurityRejection(format!(
                 "File extension '.{}' may contain unsafe Python pickle bytecode",
                 ext
@@ -57,8 +63,27 @@ pub fn detect_safe_format<R: Read>(mut reader: R) -> Result<SafeFormat, ModeldEr
     // a renamed pickle never reaches the CAS store even if the extension
     // check passed.
     if header[0] == 0x80 && (header[1] >= 2 && header[1] <= 5) {
+        tracing::error!(
+            target: "security_alert",
+            incident = "UNSAFE_MODEL_FORMAT_REJECTED",
+            reason = "Detected Python pickle protocol header opcode",
+            header_prefix = ?&header[0..4],
+        );
         return Err(ModeldError::SecurityRejection(
             "Detected Python pickle protocol header opcode".into(),
+        ));
+    }
+
+    // PyTorch PK zip archive header: [0x50, 0x4b, 0x03, 0x04] containing pickle bytecode
+    if &header[0..4] == &[0x50, 0x4b, 0x03, 0x04] {
+        tracing::error!(
+            target: "security_alert",
+            incident = "UNSAFE_MODEL_FORMAT_REJECTED",
+            reason = "Detected PyTorch PK zip header containing pickle bytecode",
+            header_prefix = ?&header[0..4],
+        );
+        return Err(ModeldError::SecurityRejection(
+            "Detected PyTorch PK zip header containing pickle bytecode".into(),
         ));
     }
 
@@ -154,5 +179,19 @@ mod tests {
         bytes.push(b'{');
         let res = detect_safe_format(&bytes[..]);
         assert!(res.is_err());
+    }
+
+    #[test]
+    fn test_detect_safe_format_rejects_pytorch_pk_zip() {
+        let pk_zip = [0x50, 0x4b, 0x03, 0x04, 0x00, 0x00, 0x00, 0x00];
+        let res = detect_safe_format(&pk_zip[..]);
+        assert!(matches!(res, Err(ModeldError::SecurityRejection(_))));
+    }
+
+    #[test]
+    fn test_detect_safe_format_rejects_pickle_opcodes() {
+        let pickle = [0x80, 0x04, 0x95, 0x00, 0x00, 0x00, 0x00, 0x00];
+        let res = detect_safe_format(&pickle[..]);
+        assert!(matches!(res, Err(ModeldError::SecurityRejection(_))));
     }
 }
