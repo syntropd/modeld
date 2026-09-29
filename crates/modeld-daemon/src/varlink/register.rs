@@ -20,7 +20,9 @@ pub fn handle_register(
     };
 
     let tag_param = params.and_then(|p| p.get("tag")).and_then(|v| v.as_str());
-    let digest_param = params.and_then(|p| p.get("digest")).and_then(|v| v.as_str());
+    let digest_param = params
+        .and_then(|p| p.get("digest"))
+        .and_then(|v| v.as_str());
 
     let (name, tag) = match tag_param {
         Some(t) => {
@@ -49,31 +51,36 @@ pub fn handle_register(
         );
     }
 
+    let resolve_id = format!("{}:{}", name, tag);
     let digest_candidate = match digest_param {
         Some(d) => d.trim().to_string(),
-        None => match ctx.tags.resolve(id) {
+        None => match ctx.tags.resolve(&resolve_id) {
             Ok(Some(d)) => d,
             Ok(None) => {
                 return VarlinkReply::err(
                     "io.syntrop.Model1.NoSuchModel",
-                    Some(json!({ "id": id })),
+                    Some(json!({ "id": resolve_id })),
                 );
             }
             Err(_) => {
                 return VarlinkReply::err(
                     "io.syntrop.Model1.InvalidIdentifier",
-                    Some(json!({ "id": id })),
+                    Some(json!({ "id": resolve_id })),
                 );
             }
         },
     };
 
-    let clean_digest = digest_candidate
-        .strip_prefix("sha256-")
-        .unwrap_or(&digest_candidate)
-        .strip_suffix(".gguf")
-        .unwrap_or(&digest_candidate)
-        .to_string();
+    let mut d_str = digest_candidate.as_str();
+    if let Some(rest) = d_str.strip_prefix("sha256:") {
+        d_str = rest;
+    } else if let Some(rest) = d_str.strip_prefix("sha256-") {
+        d_str = rest;
+    }
+    if let Some(rest) = d_str.strip_suffix(".gguf") {
+        d_str = rest;
+    }
+    let clean_digest = d_str.to_ascii_lowercase();
 
     if let Err(e) = validate_digest_format(&clean_digest) {
         return VarlinkReply::err(

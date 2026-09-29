@@ -84,7 +84,10 @@ pub async fn resolve_model(
         if quant.is_none() {
             let (name, tag) = parse_tag_override(alias.name, alias.tag, tag_override);
             return Ok(ResolvedModel {
-                download_url: format!("https://huggingface.co/{}/resolve/main/{}", alias.repo, alias.file),
+                download_url: format!(
+                    "https://huggingface.co/{}/resolve/main/{}",
+                    alias.repo, alias.file
+                ),
                 filename: alias.file.to_string(),
                 name,
                 tag,
@@ -101,7 +104,11 @@ pub async fn resolve_model(
     Err(anyhow!(
         "Unknown model alias '{}'. Known aliases: {}",
         spec,
-        ALIASES.iter().map(|a| a.alias).collect::<Vec<_>>().join(", ")
+        ALIASES
+            .iter()
+            .map(|a| a.alias)
+            .collect::<Vec<_>>()
+            .join(", ")
     ))
 }
 
@@ -152,10 +159,17 @@ async fn resolve_hf_repo(
     })
 }
 
-fn select_gguf_file(files: &[String], quant: Option<&str>) -> Result<String> {
+pub fn select_gguf_file(files: &[String], quant: Option<&str>) -> Result<String> {
+    if files.is_empty() {
+        return Err(anyhow!("No GGUF files found for selection"));
+    }
+
     if let Some(q) = quant {
         let q_upper = q.to_ascii_uppercase();
-        if let Some(found) = files.iter().find(|f| f.to_ascii_uppercase().contains(&q_upper)) {
+        if let Some(found) = files
+            .iter()
+            .find(|f| f.to_ascii_uppercase().contains(&q_upper))
+        {
             return Ok(found.clone());
         }
         return Err(anyhow!(
@@ -175,14 +189,32 @@ fn select_gguf_file(files: &[String], quant: Option<&str>) -> Result<String> {
     Ok(files[0].clone())
 }
 
-fn parse_tag_override(default_name: &str, default_tag: &str, override_str: Option<&str>) -> (String, String) {
+fn parse_tag_override(
+    default_name: &str,
+    default_tag: &str,
+    override_str: Option<&str>,
+) -> (String, String) {
     if let Some(t) = override_str {
+        let t = t.trim();
         if let Some((n, v)) = t.split_once(':') {
-            (n.to_string(), v.to_string())
-        } else {
+            let name = if n.trim().is_empty() {
+                default_name
+            } else {
+                n.trim()
+            };
+            let tag = if v.trim().is_empty() {
+                default_tag
+            } else {
+                v.trim()
+            };
+            (name.to_string(), tag.to_string())
+        } else if !t.is_empty() {
             (default_name.to_string(), t.to_string())
+        } else {
+            (default_name.to_string(), default_tag.to_string())
         }
     } else {
         (default_name.to_string(), default_tag.to_string())
     }
 }
+
