@@ -80,10 +80,7 @@ fn handle_pin(params: Option<&serde_json::Value>, ctx: &ModelServiceContext) -> 
             );
         }
         ResolveOutcome::NotFound => {
-            return VarlinkReply::err(
-                "io.syntrop.Model1.NoSuchModel",
-                Some(json!({ "id": id })),
-            );
+            return VarlinkReply::err("io.syntrop.Model1.NoSuchModel", Some(json!({ "id": id })));
         }
     };
 
@@ -111,10 +108,7 @@ fn handle_unpin(params: Option<&serde_json::Value>, ctx: &ModelServiceContext) -
             );
         }
         ResolveOutcome::NotFound => {
-            return VarlinkReply::err(
-                "io.syntrop.Model1.NoSuchModel",
-                Some(json!({ "id": id })),
-            );
+            return VarlinkReply::err("io.syntrop.Model1.NoSuchModel", Some(json!({ "id": id })));
         }
     };
 
@@ -154,15 +148,46 @@ fn handle_prune(params: Option<&serde_json::Value>, ctx: &ModelServiceContext) -
 
 fn handle_get_storage_stats(ctx: &ModelServiceContext) -> VarlinkReply {
     let blobs_dir = ctx.cas.blobs_dir();
+    let cas_dir = ctx.cas.cas_dir();
     let mut total_bytes: u64 = 0;
     let mut model_count: usize = 0;
+
+    #[cfg(unix)]
+    use std::os::unix::fs::MetadataExt;
+    let mut visited_inodes = std::collections::HashSet::new();
 
     if let Ok(entries) = fs::read_dir(blobs_dir) {
         for entry in entries.flatten() {
             if let Ok(meta) = entry.metadata() {
                 if meta.is_file() {
-                    total_bytes += meta.len();
-                    model_count += 1;
+                    #[cfg(unix)]
+                    let is_new = visited_inodes.insert((meta.dev(), meta.ino()));
+                    #[cfg(not(unix))]
+                    let is_new = true;
+                    if is_new {
+                        total_bytes += meta.len();
+                        model_count += 1;
+                    }
+                }
+            }
+        }
+    }
+
+    if let Ok(entries) = fs::read_dir(cas_dir) {
+        for entry in entries.flatten() {
+            let name = entry.file_name().to_string_lossy().to_string();
+            if name.starts_with("sha256-") && name.ends_with(".gguf") {
+                if let Ok(meta) = entry.metadata() {
+                    if meta.is_file() {
+                        #[cfg(unix)]
+                        let is_new = visited_inodes.insert((meta.dev(), meta.ino()));
+                        #[cfg(not(unix))]
+                        let is_new = true;
+                        if is_new {
+                            total_bytes += meta.len();
+                            model_count += 1;
+                        }
+                    }
                 }
             }
         }

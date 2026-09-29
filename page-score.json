@@ -1,7 +1,7 @@
 {
  "repo": "modeld",
- "rev": "0fa9195",
- "dirty": true,
+ "rev": "bf3fd74",
+ "dirty": false,
  "pages": [
   {
    "path": "./crates/modelctl/src/client.rs",
@@ -75,21 +75,21 @@
   },
   {
    "path": "./crates/modelctl/src/cmd/pull/resolve.rs",
-   "lines": 188,
-   "bin_bytes": 14766,
+   "lines": 220,
+   "bin_bytes": 15338,
    "heat_pct": null,
-   "reach": 1
+   "reach": 2
   },
   {
    "path": "./crates/modelctl/src/cmd/pull/stream.rs",
-   "lines": 168,
-   "bin_bytes": 9381,
+   "lines": 203,
+   "bin_bytes": 9440,
    "heat_pct": null,
    "reach": 1
   },
   {
    "path": "./crates/modelctl/src/lib.rs",
-   "lines": 7,
+   "lines": 8,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -117,8 +117,8 @@
   },
   {
    "path": "./crates/modeld-core/src/cas/eviction.rs",
-   "lines": 121,
-   "bin_bytes": 6702,
+   "lines": 149,
+   "bin_bytes": 9787,
    "heat_pct": null,
    "reach": 2
   },
@@ -138,8 +138,8 @@
   },
   {
    "path": "./crates/modeld-core/src/cas/store.rs",
-   "lines": 133,
-   "bin_bytes": 2321,
+   "lines": 145,
+   "bin_bytes": 3219,
    "heat_pct": null,
    "reach": 3
   },
@@ -285,8 +285,8 @@
   },
   {
    "path": "./crates/modeld-daemon/src/varlink/model1.rs",
-   "lines": 178,
-   "bin_bytes": 19546,
+   "lines": 203,
+   "bin_bytes": 21589,
    "heat_pct": null,
    "reach": 4
   },
@@ -306,8 +306,8 @@
   },
   {
    "path": "./crates/modeld-daemon/src/varlink/register.rs",
-   "lines": 143,
-   "bin_bytes": 18997,
+   "lines": 150,
+   "bin_bytes": 19576,
    "heat_pct": null,
    "reach": 2
   },
@@ -481,7 +481,14 @@
   },
   {
    "path": "./qa/unit/src/modelctl/mod.rs",
-   "lines": 4,
+   "lines": 5,
+   "bin_bytes": null,
+   "heat_pct": null,
+   "reach": 0
+  },
+  {
+   "path": "./qa/unit/src/modelctl/pull_tests.rs",
+   "lines": 39,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -509,7 +516,7 @@
   },
   {
    "path": "./qa/unit/src/varlink/varlink_tests.rs",
-   "lines": 129,
+   "lines": 220,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0

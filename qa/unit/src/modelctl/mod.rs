@@ -2,3 +2,4 @@
 
 mod client_tests;
 mod cmd_tests;
+mod pull_tests;

@@ -74,22 +74,47 @@ impl EvictionManager {
     /// Returns the total number of bytes reclaimed.
     pub fn prune(&self, cas: &CasStore, max_bytes: u64) -> Result<u64, ModeldError> {
         let blobs_dir = cas.blobs_dir();
-        if !blobs_dir.is_dir() {
-            return Ok(0);
-        }
+        let cas_dir = cas.cas_dir();
 
         let mut blobs: Vec<(String, u64, SystemTime)> = Vec::new();
         let mut current_total: u64 = 0;
 
-        for entry in fs::read_dir(&blobs_dir)? {
-            let entry = entry?;
-            if entry.file_type()?.is_file() {
-                let digest = entry.file_name().to_string_lossy().to_string();
-                let meta = entry.metadata()?;
-                let size = meta.len();
-                let modified = meta.modified().unwrap_or(SystemTime::UNIX_EPOCH);
-                current_total += size;
-                blobs.push((digest, size, modified));
+        if blobs_dir.is_dir() {
+            for entry in fs::read_dir(&blobs_dir)? {
+                let entry = entry?;
+                if entry.file_type()?.is_file() {
+                    let digest = entry.file_name().to_string_lossy().to_string();
+                    let meta = entry.metadata()?;
+                    let size = meta.len();
+                    let modified = meta.modified().unwrap_or(SystemTime::UNIX_EPOCH);
+                    current_total += size;
+                    blobs.push((digest, size, modified));
+                }
+            }
+        }
+
+        if cas_dir.is_dir() {
+            if let Ok(entries) = fs::read_dir(&cas_dir) {
+                for entry in entries.flatten() {
+                    if let Ok(ft) = entry.file_type() {
+                        if ft.is_file() {
+                            let name = entry.file_name().to_string_lossy().to_string();
+                            if let Some(rest) = name.strip_prefix("sha256-") {
+                                if let Some(digest) = rest.strip_suffix(".gguf") {
+                                    if !blobs.iter().any(|(d, _, _)| d == digest) {
+                                        if let Ok(meta) = entry.metadata() {
+                                            let size = meta.len();
+                                            let modified =
+                                                meta.modified().unwrap_or(SystemTime::UNIX_EPOCH);
+                                            current_total += size;
+                                            blobs.push((digest.to_string(), size, modified));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -109,8 +134,11 @@ impl EvictionManager {
                 continue;
             }
 
-            let path = cas.blob_path(&digest);
-            if fs::remove_file(path).is_ok() {
+            let standard_path = cas.blobs_dir().join(&digest);
+            let flat_path = cas.cas_dir().join(format!("sha256-{}.gguf", digest));
+            let r1 = fs::remove_file(standard_path).is_ok();
+            let r2 = fs::remove_file(flat_path).is_ok();
+            if r1 || r2 {
                 current_total = current_total.saturating_sub(size);
                 reclaimed_bytes += size;
             }

@@ -31,6 +31,11 @@ impl CasStore {
         Ok(store)
     }
 
+    /// Returns the cas directory root path.
+    pub fn cas_dir(&self) -> PathBuf {
+        self.root_dir.join("cas")
+    }
+
     /// Returns the directory path where finalized blobs reside.
     pub fn blobs_dir(&self) -> PathBuf {
         self.root_dir.join("cas").join("blobs").join("sha256")
@@ -43,7 +48,15 @@ impl CasStore {
 
     /// Returns the absolute filesystem path for a specific SHA-256 digest.
     pub fn blob_path(&self, digest: &str) -> PathBuf {
-        self.blobs_dir().join(digest)
+        let standard = self.blobs_dir().join(digest);
+        if standard.is_file() {
+            return standard;
+        }
+        let flat = self.cas_dir().join(format!("sha256-{}.gguf", digest));
+        if flat.is_file() {
+            return flat;
+        }
+        standard
     }
 
     /// Checks if a blob with the specified digest already exists.
@@ -63,8 +76,7 @@ impl CasStore {
     /// Returns the size in bytes of an existing blob.
     pub fn blob_size(&self, digest: &str) -> Result<u64, ModeldError> {
         let path = self.blob_path(digest);
-        let meta = fs::metadata(&path)
-            .map_err(|_| ModeldError::NotFound(digest.to_string()))?;
+        let meta = fs::metadata(&path).map_err(|_| ModeldError::NotFound(digest.to_string()))?;
         Ok(meta.len())
     }
 
