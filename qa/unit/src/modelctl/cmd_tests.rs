@@ -83,6 +83,30 @@ fn test_run_import_rejects_unsafe_extension() {
 }
 
 #[test]
+fn test_run_import_rejects_pickle_opcodes_disguised_as_gguf() {
+    let storage = TempDir::new().unwrap();
+    let storage_path = storage.path().join("cas");
+    let src = storage.path().join("disguised.gguf");
+    let mut evil = vec![0x80, 0x04];
+    evil.extend_from_slice(b"cos\nsystem\n(S'id'\ntR.");
+    std::fs::write(&src, evil).unwrap();
+    let err = run_import(&storage_path, &src, None).unwrap_err();
+    assert!(err.to_string().contains("Security rejection"));
+}
+
+#[test]
+fn test_run_import_rejects_pytorch_pk_zip_disguised_as_gguf() {
+    let storage = TempDir::new().unwrap();
+    let storage_path = storage.path().join("cas");
+    let src = storage.path().join("pytorch.gguf");
+    let mut evil = vec![0x50, 0x4b, 0x03, 0x04];
+    evil.extend_from_slice(b"extra payload bytes");
+    std::fs::write(&src, evil).unwrap();
+    let err = run_import(&storage_path, &src, None).unwrap_err();
+    assert!(err.to_string().contains("Security rejection"));
+}
+
+#[test]
 fn test_run_import_rejects_empty_tag() {
     let storage = TempDir::new().unwrap();
     let storage_path = storage.path().join("cas");

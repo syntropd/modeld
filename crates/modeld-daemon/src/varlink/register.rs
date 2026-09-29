@@ -79,6 +79,8 @@ pub fn handle_register(
     }
     if let Some(rest) = d_str.strip_suffix(".gguf") {
         d_str = rest;
+    } else if let Some(rest) = d_str.strip_suffix(".safetensors") {
+        d_str = rest;
     }
     let clean_digest = d_str.to_ascii_lowercase();
 

@@ -37,3 +37,49 @@ fn test_select_gguf_file_preference_and_empty() {
     assert_eq!(select_gguf_file(&files, Some("q8_0")).unwrap(), "model-q8_0.gguf");
     assert!(select_gguf_file(&files, Some("nonexistent")).is_err());
 }
+
+#[test]
+fn test_select_safetensors_file() {
+    use modelctl::cmd::pull::resolve::select_file;
+    let files = vec![
+        "other.safetensors".to_string(),
+        "model.safetensors".to_string(),
+    ];
+    assert_eq!(
+        select_file(&files, "safetensors", None).unwrap(),
+        "model.safetensors"
+    );
+}
+
+#[test]
+fn test_commit_artifact_safetensors_and_tokenizer() {
+    use modelctl::cmd::pull::commit_artifact::{commit_artifact, commit_tokenizer, ArtifactCommit};
+    use tempfile::TempDir;
+
+    let tmp = TempDir::new().unwrap();
+    let root = tmp.path();
+    let stage = root.join("stage.tmp");
+    std::fs::create_dir_all(root.join("cas")).unwrap();
+    std::fs::write(&stage, b"safetensors payload").unwrap();
+
+    let commit = ArtifactCommit {
+        storage_root: root,
+        stage_path: &stage,
+        digest: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        format: "safetensors",
+        name: "test-model",
+        tag: "latest",
+    };
+    commit_artifact(&commit).unwrap();
+
+    let cas_file = root.join("cas/sha256-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef.safetensors");
+    assert!(cas_file.exists());
+    let symlink = root.join("safetensors/test-model.safetensors");
+    assert!(symlink.exists());
+    let tag_file = root.join("tags/test-model/latest");
+    assert_eq!(std::fs::read_to_string(tag_file).unwrap(), commit.digest);
+
+    commit_tokenizer(root, "test-model", b"{\"vocab\": {}}").unwrap();
+    let tok_file = root.join("safetensors/test-model.tokenizer.json");
+    assert!(tok_file.exists());
+}
