@@ -25,6 +25,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Run release-plz
+        continue-on-error: true
         uses: release-plz/action@v0.5
         with:
           command: release-pr
