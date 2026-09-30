@@ -24,11 +24,10 @@ pr_labels = ["release-plz"]
 
 # No git releases by default until the maintainer flips this on; the
 # release-plz PR is enough for now.
-git_release = "disable"
+git_release_enable = false
 
-# Don't publish to crates.io until we're ready. Set this to
-# "always" once the workspace is public.
-publish = "never"
+# Don't publish to crates.io until we're ready.
+publish = false
 
 [changelog]
 # Use the same commit-author ordering release-plz uses for stable
