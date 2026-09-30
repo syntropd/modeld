@@ -44,6 +44,20 @@ pub const ALIASES: &[ModelAlias] = &[
         name: "gemma4",
         tag: "e2b",
     },
+    ModelAlias {
+        alias: "qwen2.5-coder:1.5b",
+        repo: "Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF",
+        file: "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
+        name: "qwen2.5-coder",
+        tag: "1.5b",
+    },
+    ModelAlias {
+        alias: "qwen2.5-coder:7b",
+        repo: "Qwen/Qwen2.5-Coder-7B-Instruct-GGUF",
+        file: "qwen2.5-coder-7b-instruct-q4_k_m.gguf",
+        name: "qwen2.5-coder",
+        tag: "7b",
+    },
 ];
 
 pub fn find_alias(spec: &str) -> Option<&'static ModelAlias> {

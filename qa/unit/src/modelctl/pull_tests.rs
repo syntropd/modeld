@@ -26,6 +26,24 @@ async fn test_resolve_curated_aliases_offline() {
     assert_eq!(m3.name, "smollm2");
     assert_eq!(m3.tag, "fast");
 
+    let m4 = resolve_model(&client, "qwen2.5-coder:1.5b", None, None)
+        .await
+        .unwrap();
+    assert_eq!(m4.name, "qwen2.5-coder");
+    assert_eq!(m4.tag, "1.5b");
+    assert!(m4
+        .download_url
+        .contains("Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF"));
+
+    let m5 = resolve_model(&client, "qwen2.5-coder:7b", None, None)
+        .await
+        .unwrap();
+    assert_eq!(m5.name, "qwen2.5-coder");
+    assert_eq!(m5.tag, "7b");
+    assert!(m5
+        .download_url
+        .contains("Qwen/Qwen2.5-Coder-7B-Instruct-GGUF"));
+
     let err = resolve_model(&client, "unknown-model", None, None)
         .await
         .unwrap_err();

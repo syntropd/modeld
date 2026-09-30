@@ -1,6 +1,6 @@
 {
  "repo": "modeld",
- "rev": "9378d86",
+ "rev": "bea221b",
  "dirty": true,
  "pages": [
   {
@@ -15,18 +15,18 @@
    "lines": 58,
    "bin_bytes": null,
    "heat_pct": null,
-   "reach": 1
+   "reach": 2
   },
   {
    "path": "./crates/modelctl/src/cmd/import.rs",
    "lines": 60,
    "bin_bytes": null,
    "heat_pct": null,
-   "reach": 1
+   "reach": 2
   },
   {
    "path": "./crates/modelctl/src/cmd/inspect.rs",
-   "lines": 30,
+   "lines": 33,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 1
@@ -36,11 +36,11 @@
    "lines": 81,
    "bin_bytes": null,
    "heat_pct": null,
-   "reach": 1
+   "reach": 2
   },
   {
    "path": "./crates/modelctl/src/cmd/mod.rs",
-   "lines": 18,
+   "lines": 17,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -50,21 +50,21 @@
    "lines": 19,
    "bin_bytes": null,
    "heat_pct": null,
-   "reach": 1
+   "reach": 2
   },
   {
    "path": "./crates/modelctl/src/cmd/prune.rs",
    "lines": 31,
    "bin_bytes": null,
    "heat_pct": null,
-   "reach": 1
+   "reach": 2
   },
   {
    "path": "./crates/modelctl/src/cmd/pull/commit_artifact.rs",
    "lines": 73,
    "bin_bytes": null,
    "heat_pct": null,
-   "reach": 1
+   "reach": 2
   },
   {
    "path": "./crates/modelctl/src/cmd/pull/mod.rs",
@@ -82,14 +82,14 @@
   },
   {
    "path": "./crates/modelctl/src/cmd/pull/resolve/alias.rs",
-   "lines": 51,
+   "lines": 65,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 1
   },
   {
    "path": "./crates/modelctl/src/cmd/pull/resolve/hf_tree.rs",
-   "lines": 104,
+   "lines": 119,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 1
@@ -110,21 +110,21 @@
   },
   {
    "path": "./crates/modelctl/src/cmd/pull/stream.rs",
-   "lines": 191,
+   "lines": 196,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 1
   },
   {
    "path": "./crates/modelctl/src/lib.rs",
-   "lines": 8,
+   "lines": 15,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
   },
   {
    "path": "./crates/modelctl/src/main.rs",
-   "lines": 218,
+   "lines": 232,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -166,7 +166,7 @@
   },
   {
    "path": "./crates/modeld-core/src/cas/store.rs",
-   "lines": 149,
+   "lines": 151,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 3
@@ -194,7 +194,7 @@
   },
   {
    "path": "./crates/modeld-core/src/descriptor/fd_pass.rs",
-   "lines": 63,
+   "lines": 65,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 1
@@ -208,7 +208,7 @@
   },
   {
    "path": "./crates/modeld-core/src/descriptor/sealed_fd.rs",
-   "lines": 112,
+   "lines": 115,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 1
@@ -222,7 +222,7 @@
   },
   {
    "path": "./crates/modeld-core/src/format/gguf.rs",
-   "lines": 205,
+   "lines": 229,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 1
@@ -236,14 +236,14 @@
   },
   {
    "path": "./crates/modeld-core/src/format/safetensors.rs",
-   "lines": 110,
+   "lines": 112,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 1
   },
   {
    "path": "./crates/modeld-core/src/format/validator.rs",
-   "lines": 197,
+   "lines": 199,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 2
@@ -313,14 +313,14 @@
   },
   {
    "path": "./crates/modeld-daemon/src/varlink/model1.rs",
-   "lines": 210,
+   "lines": 212,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 4
   },
   {
    "path": "./crates/modeld-daemon/src/varlink/mod.rs",
-   "lines": 18,
+   "lines": 17,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -334,7 +334,7 @@
   },
   {
    "path": "./crates/modeld-daemon/src/varlink/register.rs",
-   "lines": 185,
+   "lines": 190,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 2
@@ -348,7 +348,7 @@
   },
   {
    "path": "./crates/modeld-daemon/src/varlink/service.rs",
-   "lines": 91,
+   "lines": 94,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 2
@@ -362,7 +362,7 @@
   },
   {
    "path": "./qa/edge/src/corrupted_tests.rs",
-   "lines": 32,
+   "lines": 36,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -376,7 +376,7 @@
   },
   {
    "path": "./qa/unit/src/cas/digest_tests.rs",
-   "lines": 48,
+   "lines": 52,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -397,7 +397,7 @@
   },
   {
    "path": "./qa/unit/src/cas/pin_validation_tests.rs",
-   "lines": 87,
+   "lines": 85,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -418,7 +418,7 @@
   },
   {
    "path": "./qa/unit/src/cas/tags_tests.rs",
-   "lines": 57,
+   "lines": 66,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -453,14 +453,14 @@
   },
   {
    "path": "./qa/unit/src/format/format_string_tests.rs",
-   "lines": 55,
+   "lines": 52,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
   },
   {
    "path": "./qa/unit/src/format/gguf_tests.rs",
-   "lines": 135,
+   "lines": 142,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -474,7 +474,7 @@
   },
   {
    "path": "./qa/unit/src/format/safetensors_tests.rs",
-   "lines": 31,
+   "lines": 35,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -502,7 +502,7 @@
   },
   {
    "path": "./qa/unit/src/modelctl/cmd_tests.rs",
-   "lines": 165,
+   "lines": 189,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -516,7 +516,7 @@
   },
   {
    "path": "./qa/unit/src/modelctl/pull_tests.rs",
-   "lines": 39,
+   "lines": 116,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -537,7 +537,7 @@
   },
   {
    "path": "./qa/unit/src/varlink/server_tests.rs",
-   "lines": 162,
+   "lines": 170,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
