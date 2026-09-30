@@ -37,4 +37,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CARGO_TERM_COLOR: always
-        run: release-plz release-pr
+        run: release-plz release-pr --git-token "$GITHUB_TOKEN"
