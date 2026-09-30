@@ -77,8 +77,10 @@ fn connect(sock: &std::path::Path) -> UnixStream {
 fn request_id(stream: &mut UnixStream, id: &str) {
     let mut req = serde_json::to_vec(&serde_json::json!({ "id": id })).unwrap();
     req.push(0x00);
-    stream.write_all(&req).expect("fd request write");
-    stream.flush().expect("fd request flush");
+    // Ignore BrokenPipe errors here because an unauthorized peer may have already
+    // been rejected and closed by the server, but we still want to read the server's reply.
+    let _ = stream.write_all(&req);
+    let _ = stream.flush();
 }
 
 // Multi-threaded runtime: the test thread performs blocking client
