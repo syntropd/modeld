@@ -1,6 +1,6 @@
 {
  "repo": "modeld",
- "rev": "bea221b",
+ "rev": "5d368e7",
  "dirty": true,
  "pages": [
   {
@@ -40,7 +40,7 @@
   },
   {
    "path": "./crates/modelctl/src/cmd/mod.rs",
-   "lines": 17,
+   "lines": 19,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -60,6 +60,13 @@
    "reach": 2
   },
   {
+   "path": "./crates/modelctl/src/cmd/pull/bootstrap.rs",
+   "lines": 181,
+   "bin_bytes": null,
+   "heat_pct": null,
+   "reach": 2
+  },
+  {
    "path": "./crates/modelctl/src/cmd/pull/commit_artifact.rs",
    "lines": 73,
    "bin_bytes": null,
@@ -68,7 +75,7 @@
   },
   {
    "path": "./crates/modelctl/src/cmd/pull/mod.rs",
-   "lines": 8,
+   "lines": 10,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -113,7 +120,7 @@
    "lines": 196,
    "bin_bytes": null,
    "heat_pct": null,
-   "reach": 1
+   "reach": 2
   },
   {
    "path": "./crates/modelctl/src/lib.rs",
@@ -124,7 +131,7 @@
   },
   {
    "path": "./crates/modelctl/src/main.rs",
-   "lines": 232,
+   "lines": 252,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -214,6 +221,41 @@
    "reach": 1
   },
   {
+   "path": "./crates/modeld-core/src/envelope/budget.rs",
+   "lines": 128,
+   "bin_bytes": null,
+   "heat_pct": null,
+   "reach": 3
+  },
+  {
+   "path": "./crates/modeld-core/src/envelope/family.rs",
+   "lines": 128,
+   "bin_bytes": null,
+   "heat_pct": null,
+   "reach": 2
+  },
+  {
+   "path": "./crates/modeld-core/src/envelope/mod.rs",
+   "lines": 21,
+   "bin_bytes": null,
+   "heat_pct": null,
+   "reach": 0
+  },
+  {
+   "path": "./crates/modeld-core/src/envelope/plan.rs",
+   "lines": 256,
+   "bin_bytes": null,
+   "heat_pct": null,
+   "reach": 2
+  },
+  {
+   "path": "./crates/modeld-core/src/envelope/topology.rs",
+   "lines": 195,
+   "bin_bytes": null,
+   "heat_pct": null,
+   "reach": 2
+  },
+  {
    "path": "./crates/modeld-core/src/error.rs",
    "lines": 107,
    "bin_bytes": null,
@@ -250,7 +292,7 @@
   },
   {
    "path": "./crates/modeld-core/src/lib.rs",
-   "lines": 65,
+   "lines": 78,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -460,7 +502,7 @@
   },
   {
    "path": "./qa/unit/src/format/gguf_tests.rs",
-   "lines": 142,
+   "lines": 141,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -523,7 +565,7 @@
   },
   {
    "path": "./qa/unit/src/varlink/fd_handoff_tests.rs",
-   "lines": 170,
+   "lines": 172,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
