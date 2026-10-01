@@ -54,8 +54,8 @@ pub(crate) fn plan_qwen(budget: &MemoryBudget) -> BootstrapPlan {
             ModelRole::GpuPrimary,
             "qwen2.5",
             "7b",
-            "Qwen/Qwen2.5-7B-Instruct-GGUF",
-            "qwen2.5-7b-instruct-q4_k_m.gguf",
+            "bartowski/Qwen2.5-7B-Instruct-GGUF",
+            "Qwen2.5-7B-Instruct-Q4_K_M.gguf",
             "Q4_K_M",
             (5.2 * 1024.0 * 1024.0 * 1024.0) as u64,
         ))
@@ -68,8 +68,8 @@ pub(crate) fn plan_qwen(budget: &MemoryBudget) -> BootstrapPlan {
             ModelRole::DeepReasoner,
             "qwen2.5",
             "32b",
-            "Qwen/Qwen2.5-32B-Instruct-GGUF",
-            "qwen2.5-32b-instruct-q4_k_m.gguf",
+            "bartowski/Qwen2.5-32B-Instruct-GGUF",
+            "Qwen2.5-32B-Instruct-Q4_K_M.gguf",
             "Q4_K_M",
             (20.5 * 1024.0 * 1024.0 * 1024.0) as u64,
         ))
@@ -78,8 +78,8 @@ pub(crate) fn plan_qwen(budget: &MemoryBudget) -> BootstrapPlan {
             ModelRole::DeepReasoner,
             "qwen2.5",
             "14b",
-            "Qwen/Qwen2.5-14B-Instruct-GGUF",
-            "qwen2.5-14b-instruct-q4_k_m.gguf",
+            "bartowski/Qwen2.5-14B-Instruct-GGUF",
+            "Qwen2.5-14B-Instruct-Q4_K_M.gguf",
             "Q4_K_M",
             (9.5 * 1024.0 * 1024.0 * 1024.0) as u64,
         ))

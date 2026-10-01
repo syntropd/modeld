@@ -78,7 +78,23 @@ pub async fn run_pull<P: AsRef<Path>>(
     let incoming_dir = cas_dir.join("incoming");
     fs::create_dir_all(&incoming_dir).context("Failed to create incoming directory")?;
 
-    let stage_filename = format!("pull-{}-{}", std::process::id(), resolved.name);
+    use std::sync::atomic::{AtomicU64, Ordering};
+    static DOWNLOAD_COUNTER: AtomicU64 = AtomicU64::new(1);
+    let seq = DOWNLOAD_COUNTER.fetch_add(1, Ordering::Relaxed);
+    let nanos = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_nanos())
+        .unwrap_or(0);
+    let safe_name = resolved.name.replace('/', "-");
+    let safe_tag = resolved.tag.replace(':', "-");
+    let stage_filename = format!(
+        "pull-{}-{}-{}-{}-{}",
+        std::process::id(),
+        safe_name,
+        safe_tag,
+        seq,
+        nanos
+    );
     let stage_path = incoming_dir.join(stage_filename);
     let mut stage_file = File::create(&stage_path).context("Failed to create staging file")?;
 

@@ -45,18 +45,30 @@ pub fn commit_artifact(commit: &ArtifactCommit) -> Result<()> {
     let tag_file = tag_dir.join(commit.tag);
     fs::write(&tag_file, commit.digest.as_bytes()).context("Failed to write tag file")?;
 
-    // 4. Create format-specific symlink: /var/lib/models/<format>/<name>.<ext>
+    // 4. Create format-specific symlinks: /var/lib/models/<format>/<name>.<ext>
+    // Also create tagged variants: <name>:<tag>.<ext> and <name>-<tag>.<ext>
     let fmt_dir = root.join(ext);
     fs::create_dir_all(&fmt_dir).context(format!("Failed to create {} directory", ext))?;
     let symlink_dest = fmt_dir.join(format!("{}.{}", commit.name, ext));
-    let _ = fs::remove_file(&symlink_dest);
 
     #[cfg(unix)]
     {
         use std::os::unix::fs::symlink;
         let link_target = fs::canonicalize(&cas_dest).unwrap_or_else(|_| cas_dest.clone());
-        if let Err(e) = symlink(&link_target, &symlink_dest) {
-            warn!("Failed to create symlink at {:?}: {}", symlink_dest, e);
+        if commit.tag == "latest" || !symlink_dest.exists() {
+            let _ = fs::remove_file(&symlink_dest);
+            if let Err(e) = symlink(&link_target, &symlink_dest) {
+                warn!("Failed to create symlink at {:?}: {}", symlink_dest, e);
+            }
+        }
+        if commit.tag != "latest" {
+            let colon_dest = fmt_dir.join(format!("{}:{}.{}", commit.name, commit.tag, ext));
+            let _ = fs::remove_file(&colon_dest);
+            let _ = symlink(&link_target, &colon_dest);
+
+            let dash_dest = fmt_dir.join(format!("{}-{}.{}", commit.name, commit.tag, ext));
+            let _ = fs::remove_file(&dash_dest);
+            let _ = symlink(&link_target, &dash_dest);
         }
     }
 

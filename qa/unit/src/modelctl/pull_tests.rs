@@ -68,6 +68,40 @@ fn test_select_gguf_file_preference_and_empty() {
 }
 
 #[test]
+fn test_select_gguf_f16_does_not_select_bf16() {
+    let files = vec![
+        "gemma-4-E2B-it-BF16.gguf".to_string(),
+        "mmproj-BF16.gguf".to_string(),
+        "mmproj-F16.gguf".to_string(),
+    ];
+    assert_eq!(
+        select_gguf_file(&files, Some("F16")).unwrap(),
+        "mmproj-F16.gguf"
+    );
+}
+
+#[test]
+fn test_select_gguf_canonical_quant_over_experimental_fp16() {
+    let files = vec![
+        "gemma-2-9b-it-Q4_K_M-fp16.gguf".to_string(),
+        "gemma-2-9b-it-Q4_K_M.gguf".to_string(),
+    ];
+    assert_eq!(
+        select_gguf_file(&files, Some("Q4_K_M")).unwrap(),
+        "gemma-2-9b-it-Q4_K_M.gguf"
+    );
+
+    let files27b = vec![
+        "gemma-2-27b-it-Q8_0-f16.gguf".to_string(),
+        "gemma-2-27b-it-Q8_0.gguf".to_string(),
+    ];
+    assert_eq!(
+        select_gguf_file(&files27b, Some("Q8_0")).unwrap(),
+        "gemma-2-27b-it-Q8_0.gguf"
+    );
+}
+
+#[test]
 fn test_select_safetensors_file() {
     use modelctl::cmd::pull::resolve::select_file;
     let files = vec![
