@@ -1,7 +1,7 @@
 {
  "repo": "modeld",
- "rev": "6c3530d",
- "dirty": true,
+ "rev": "0f15457",
+ "dirty": false,
  "pages": [
   {
    "path": "./crates/modelctl/src/client.rs",
@@ -68,7 +68,7 @@
   },
   {
    "path": "./crates/modelctl/src/cmd/pull/commit_artifact.rs",
-   "lines": 73,
+   "lines": 85,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 2
@@ -110,14 +110,14 @@
   },
   {
    "path": "./crates/modelctl/src/cmd/pull/resolve/select.rs",
-   "lines": 72,
+   "lines": 140,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 1
   },
   {
    "path": "./crates/modelctl/src/cmd/pull/stream.rs",
-   "lines": 196,
+   "lines": 212,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 2
@@ -565,7 +565,7 @@
   },
   {
    "path": "./qa/unit/src/modelctl/pull_tests.rs",
-   "lines": 116,
+   "lines": 150,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
