@@ -758,6 +758,7 @@ dependencies = [
  "serde_json",
  "sha2",
  "syntrop-modeld-core",
+ "tempfile",
  "tokio",
  "tracing",
  "tracing-subscriber",

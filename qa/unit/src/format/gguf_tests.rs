@@ -90,8 +90,7 @@ fn build_gguf_header_with_large_array() -> Vec<u8> {
     buf.extend_from_slice(&4u32.to_le_bytes()); // array element type: u32
     buf.extend_from_slice(&5000u64.to_le_bytes()); // element count
     buf.extend(
-        std::iter::repeat(0u32)
-            .take(5000)
+        std::iter::repeat_n(0u32, 5000)
             .flat_map(|n| n.to_le_bytes()),
     );
 

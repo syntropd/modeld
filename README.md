@@ -47,6 +47,12 @@ sudo ./install/install.sh
 
 ### 3. Usage with `modelctl`
 ```bash
+# Bootstrap a curated model family according to hardware envelope (qwen, granite, or gemma)
+modelctl bootstrap --family qwen
+
+# Preview the hardware envelope sizing plan without downloading
+modelctl bootstrap --family granite --dry-run
+
 # Import a model file into the CAS store
 modelctl import ./weights.gguf --tag=llama3.2:1b
 

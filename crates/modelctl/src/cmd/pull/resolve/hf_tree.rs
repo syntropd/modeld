@@ -81,7 +81,7 @@ pub async fn resolve_hf_repo(
     };
 
     let selected = select_file(&matched_files, format, quant)?;
-    let repo_name = repo.split('/').last().unwrap_or(repo);
+    let repo_name = repo.split('/').next_back().unwrap_or(repo);
     let default_name = repo_name.to_ascii_lowercase().replace('_', "-");
     let default_tag = if is_safetensors {
         "latest".to_string()

@@ -6,6 +6,7 @@
 pub mod cas;
 pub mod config;
 pub mod descriptor;
+pub mod envelope;
 pub mod error;
 pub mod format;
 
@@ -19,6 +20,10 @@ pub use config::{
 };
 pub use descriptor::{
     create_sealed_memfd, create_sealed_memfd_from_file, recv_fd_scm_rights, send_fd_scm_rights,
+};
+pub use envelope::{
+    query_or_fallback_topology, query_varlink_topology, read_system_ram_fallback, BootstrapPlan,
+    GpuPlaneInfo, HardwareTopology, MemoryBudget, ModelFamily, ModelRole, ModelTarget,
 };
 pub use error::ModeldError;
 pub use format::{
@@ -57,9 +62,17 @@ mod tests {
         let _ = detect_safe_format::<Cursor<&[u8]>>;
         let _ = parse_gguf_header::<Cursor<&[u8]>>;
         let _ = parse_safetensors_header::<Cursor<&[u8]>>;
-        let _ = validate_file_safety::<&Path>;
         let _ = std::mem::size_of::<GgufMetadata>();
         let _ = std::mem::size_of::<SafeFormat>();
         let _ = std::mem::size_of::<SafeTensorsMetadata>();
+        let _ = std::mem::size_of::<HardwareTopology>();
+        let _ = std::mem::size_of::<MemoryBudget>();
+        let _ = std::mem::size_of::<ModelFamily>();
+        let _ = std::mem::size_of::<ModelRole>();
+        let _ = std::mem::size_of::<ModelTarget>();
+        let _ = std::mem::size_of::<BootstrapPlan>();
+        let _ = query_or_fallback_topology;
+        let _ = query_varlink_topology;
+        let _ = read_system_ram_fallback;
     }
 }

@@ -89,6 +89,17 @@ pub enum Commands {
         force: bool,
     },
 
+    /// Bootstrap a curated model family according to hardware envelope.
+    Bootstrap {
+        /// Curated model family: qwen, granite, or gemma.
+        #[arg(long, default_value = "qwen")]
+        family: String,
+
+        /// Print sizing calculation and planned downloads without downloading.
+        #[arg(long)]
+        dry_run: bool,
+    },
+
     /// Generate shell completions.
     Completions {
         /// Target shell (bash, zsh, fish).
@@ -141,6 +152,9 @@ async fn main() -> anyhow::Result<()> {
                 force,
             )
             .await?;
+        }
+        Commands::Bootstrap { family, dry_run } => {
+            cmd::run_bootstrap(&cli.storage_path, &cli.socket, &family, dry_run, cli.json).await?;
         }
         Commands::Completions { shell } => {
             cmd::run_completions(&shell, Cli::command());
@@ -228,5 +242,11 @@ mod tests {
             matches!(cli.command, Commands::Pull { ref model, ref format, ref quant, ref tag, force: true }
             if model == "org/repo" && format == "safetensors" && quant.as_deref() == Some("Q4_K_M") && tag.as_deref() == Some("custom:v1"))
         );
+    }
+
+    #[test]
+    fn test_cli_bootstrap() {
+        let cli = parse(&["modelctl", "bootstrap", "--family", "gemma", "--dry-run"]);
+        assert!(matches!(cli.command, Commands::Bootstrap { ref family, dry_run: true } if family == "gemma"));
     }
 }

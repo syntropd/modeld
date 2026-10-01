@@ -77,7 +77,7 @@ pub fn detect_safe_format<R: Read>(mut reader: R) -> Result<SafeFormat, ModeldEr
     }
 
     // PyTorch PK zip archive header: [0x50, 0x4b, 0x03, 0x04] containing pickle bytecode
-    if &header[0..4] == &[0x50, 0x4b, 0x03, 0x04] {
+    if header[0..4] == [0x50, 0x4b, 0x03, 0x04] {
         tracing::error!(
             target: "security_alert",
             incident = "UNSAFE_MODEL_FORMAT_REJECTED",

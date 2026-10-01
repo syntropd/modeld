@@ -35,7 +35,7 @@ pub fn parse_gguf_header<R: Read + Seek>(mut reader: R) -> Result<GgufMetadata, 
     }
 
     let version = read_u32_le(&mut reader)?;
-    if version < 2 || version > 3 {
+    if !(2..=3).contains(&version) {
         return Err(ModeldError::InvalidFormat(format!(
             "Unsupported GGUF version: {}",
             version
@@ -121,8 +121,8 @@ fn item_byte_size(item_type: u32) -> Option<u64> {
     match item_type {
         0 | 1 | 7 => Some(1),
         2 | 3 => Some(2),
-        4 | 5 | 6 => Some(4),
-        10 | 11 | 12 => Some(8),
+        4..=6 => Some(4),
+        10..=12 => Some(8),
         // String and array items are variable-length and cannot be sized here.
         8 | 9 => None,
         _ => None,
