@@ -1,6 +1,6 @@
 {
  "repo": "modeld",
- "rev": "5d368e7",
+ "rev": "6c3530d",
  "dirty": true,
  "pages": [
   {
@@ -61,7 +61,7 @@
   },
   {
    "path": "./crates/modelctl/src/cmd/pull/bootstrap.rs",
-   "lines": 181,
+   "lines": 179,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 2
@@ -131,7 +131,7 @@
   },
   {
    "path": "./crates/modelctl/src/main.rs",
-   "lines": 252,
+   "lines": 254,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -225,32 +225,39 @@
    "lines": 128,
    "bin_bytes": null,
    "heat_pct": null,
-   "reach": 3
+   "reach": 4
   },
   {
    "path": "./crates/modeld-core/src/envelope/family.rs",
-   "lines": 128,
+   "lines": 137,
    "bin_bytes": null,
    "heat_pct": null,
-   "reach": 2
+   "reach": 3
   },
   {
    "path": "./crates/modeld-core/src/envelope/mod.rs",
-   "lines": 21,
+   "lines": 22,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
   },
   {
    "path": "./crates/modeld-core/src/envelope/plan.rs",
-   "lines": 256,
+   "lines": 64,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 2
   },
   {
+   "path": "./crates/modeld-core/src/envelope/profiles.rs",
+   "lines": 223,
+   "bin_bytes": null,
+   "heat_pct": null,
+   "reach": 1
+  },
+  {
    "path": "./crates/modeld-core/src/envelope/topology.rs",
-   "lines": 195,
+   "lines": 207,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 2
@@ -502,7 +509,7 @@
   },
   {
    "path": "./qa/unit/src/format/gguf_tests.rs",
-   "lines": 141,
+   "lines": 138,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
