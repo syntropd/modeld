@@ -6,6 +6,7 @@
 pub mod budget;
 pub mod family;
 pub mod plan;
+pub mod profiles;
 pub mod topology;
 
 pub use budget::MemoryBudget;

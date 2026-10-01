@@ -2,9 +2,7 @@
 
 use super::stream::run_pull;
 use anyhow::{anyhow, Result};
-use modeld_core::envelope::{
-    query_or_fallback_topology, BootstrapPlan, MemoryBudget, ModelFamily,
-};
+use modeld_core::envelope::{query_or_fallback_topology, BootstrapPlan, MemoryBudget, ModelFamily};
 use std::path::Path;
 
 /// Executes the model family bootstrap workflow.

@@ -247,6 +247,8 @@ mod tests {
     #[test]
     fn test_cli_bootstrap() {
         let cli = parse(&["modelctl", "bootstrap", "--family", "gemma", "--dry-run"]);
-        assert!(matches!(cli.command, Commands::Bootstrap { ref family, dry_run: true } if family == "gemma"));
+        assert!(
+            matches!(cli.command, Commands::Bootstrap { ref family, dry_run: true } if family == "gemma")
+        );
     }
 }

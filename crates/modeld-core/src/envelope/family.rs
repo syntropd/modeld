@@ -24,7 +24,10 @@ impl FromStr for ModelFamily {
             "qwen" | "qwen2.5" => Ok(Self::Qwen),
             "granite" | "granite-3.0" | "granite3" => Ok(Self::Granite),
             "gemma" | "gemma2" | "gemma3" | "gemma4" => Ok(Self::Gemma),
-            other => Err(anyhow!("Unknown model family '{}'. Supported: qwen, granite, gemma", other)),
+            other => Err(anyhow!(
+                "Unknown model family '{}'. Supported: qwen, granite, gemma",
+                other
+            )),
         }
     }
 }
@@ -62,7 +65,10 @@ pub struct ModelTarget {
 
 impl ModelTarget {
     pub fn download_url(&self) -> String {
-        format!("https://huggingface.co/{}/resolve/main/{}", self.repo, self.file)
+        format!(
+            "https://huggingface.co/{}/resolve/main/{}",
+            self.repo, self.file
+        )
     }
 }
 
@@ -104,7 +110,10 @@ mod tests {
     #[test]
     fn test_family_from_str() {
         assert_eq!("qwen".parse::<ModelFamily>().unwrap(), ModelFamily::Qwen);
-        assert_eq!("granite".parse::<ModelFamily>().unwrap(), ModelFamily::Granite);
+        assert_eq!(
+            "granite".parse::<ModelFamily>().unwrap(),
+            ModelFamily::Granite
+        );
         assert_eq!("gemma".parse::<ModelFamily>().unwrap(), ModelFamily::Gemma);
         assert!("unknown".parse::<ModelFamily>().is_err());
     }

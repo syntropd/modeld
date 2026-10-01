@@ -80,7 +80,10 @@ pub fn query_varlink_topology(socket_path: &Path) -> Result<HardwareTopology> {
                 continue;
             }
             let total = p.get("total_memory").and_then(|v| v.as_u64()).unwrap_or(0);
-            let avail = p.get("available_memory").and_then(|v| v.as_u64()).unwrap_or(0);
+            let avail = p
+                .get("available_memory")
+                .and_then(|v| v.as_u64())
+                .unwrap_or(0);
             gpu_planes.push(GpuPlaneInfo {
                 id: id.to_string(),
                 name: name.to_string(),
@@ -90,9 +93,18 @@ pub fn query_varlink_topology(socket_path: &Path) -> Result<HardwareTopology> {
         }
     }
 
-    let total_ram = params.get("total_ram").and_then(|v| v.as_u64()).unwrap_or(0);
-    let available_ram = params.get("available_ram").and_then(|v| v.as_u64()).unwrap_or(0);
-    let cpu_cores = params.get("cpu_cores").and_then(|v| v.as_u64()).unwrap_or(1) as usize;
+    let total_ram = params
+        .get("total_ram")
+        .and_then(|v| v.as_u64())
+        .unwrap_or(0);
+    let available_ram = params
+        .get("available_ram")
+        .and_then(|v| v.as_u64())
+        .unwrap_or(0);
+    let cpu_cores = params
+        .get("cpu_cores")
+        .and_then(|v| v.as_u64())
+        .unwrap_or(1) as usize;
 
     Ok(HardwareTopology {
         gpu_planes,
