@@ -34,7 +34,10 @@ impl HardwareTopology {
     pub fn sum_gpu_vram(&self) -> u64 {
         self.gpu_planes
             .iter()
-            .filter(|g| g.kind != "IntegratedUma" && !g.kind.eq_ignore_ascii_case("integrateduma"))
+            .filter(|g| {
+                let k = g.kind.to_ascii_lowercase();
+                k != "integrateduma" && k != "integrated_uma"
+            })
             .map(|g| g.total_memory)
             .sum()
     }
@@ -82,7 +85,7 @@ pub fn query_varlink_topology(socket_path: &Path) -> Result<HardwareTopology> {
             let id = p.get("id").and_then(|v| v.as_str()).unwrap_or("");
             let name = p.get("name").and_then(|v| v.as_str()).unwrap_or("");
             let kind = p.get("kind").and_then(|v| v.as_str()).unwrap_or("");
-            if kind == "CpuMatrixExtension" || kind == "IntegratedUma" || id == "cpu-host" {
+            if kind == "CpuMatrixExtension" || id == "cpu-host" {
                 continue;
             }
             let total = p.get("total_memory").and_then(|v| v.as_u64()).unwrap_or(0);
@@ -220,5 +223,22 @@ mod tests {
         };
         // 24 + 24 = 48 GB; the 8 GB IntegratedUma plane must be filtered out
         assert_eq!(topo.sum_gpu_vram(), 48 * 1024 * 1024 * 1024);
+    }
+
+    #[test]
+    fn test_sum_gpu_vram_only_integrated_uma_returns_zero() {
+        let topo = HardwareTopology {
+            gpu_planes: vec![GpuPlaneInfo {
+                id: "uma0".into(),
+                name: "AMD Radeon 780M".into(),
+                kind: "IntegratedUma".into(),
+                total_memory: 8 * 1024 * 1024 * 1024,
+                available_memory: 8 * 1024 * 1024 * 1024,
+            }],
+            total_ram: 32 * 1024 * 1024 * 1024,
+            available_ram: 24 * 1024 * 1024 * 1024,
+            cpu_cores: 16,
+        };
+        assert_eq!(topo.sum_gpu_vram(), 0);
     }
 }
