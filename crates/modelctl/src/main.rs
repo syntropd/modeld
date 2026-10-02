@@ -88,8 +88,6 @@ async fn main() -> anyhow::Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     #[test]
     fn test_main_compiles() {
         assert_eq!(2 + 2, 4);

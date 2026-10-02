@@ -1,6 +1,6 @@
 {
  "repo": "modeld",
- "rev": "7882881",
+ "rev": "4150dd9",
  "dirty": true,
  "pages": [
   {
@@ -159,7 +159,7 @@
   },
   {
    "path": "./crates/modelctl/src/main.rs",
-   "lines": 97,
+   "lines": 95,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
