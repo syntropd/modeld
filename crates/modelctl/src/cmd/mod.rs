@@ -7,6 +7,7 @@ pub mod list;
 pub mod pin;
 pub mod prune;
 pub mod pull;
+pub mod visual;
 
 pub use completions::run_completions;
 pub use import::run_import;
@@ -17,3 +18,4 @@ pub use pin::run_unpin;
 pub use prune::run_prune;
 pub use pull::run_bootstrap;
 pub use pull::run_pull;
+pub use visual::{run_lora_pull, run_visual_pull};

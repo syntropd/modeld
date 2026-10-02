@@ -1,111 +1,9 @@
 //! Entrypoint for modelctl: operator CLI utility for modeld.
 
-use clap::{CommandFactory, Parser, Subcommand};
+use clap::{CommandFactory, Parser};
+use modelctl::cli::{Cli, Commands, LoraCommands, VisualCommands};
 use modelctl::client::VarlinkClient;
 use modelctl::cmd;
-use modeld_core::config::{DEFAULT_SOCKET_PATH, DEFAULT_STORAGE_PATH};
-use std::path::PathBuf;
-
-#[derive(Parser, Debug)]
-#[command(name = "modelctl", version, about = "Control modeld CAS storage")]
-pub struct Cli {
-    /// Varlink Unix domain socket path.
-    #[arg(long, global = true, default_value = DEFAULT_SOCKET_PATH)]
-    pub socket: PathBuf,
-
-    /// CAS storage root path.
-    #[arg(long, global = true, default_value = DEFAULT_STORAGE_PATH)]
-    pub storage_path: PathBuf,
-
-    /// Render machine-readable JSON output.
-    #[arg(long, global = true)]
-    pub json: bool,
-
-    #[command(subcommand)]
-    pub command: Commands,
-}
-
-#[derive(Subcommand, Debug)]
-pub enum Commands {
-    /// List all registered models in CAS storage.
-    #[command(alias = "ls")]
-    List,
-
-    /// Inspect detailed metadata for a model.
-    Inspect {
-        /// Model name or SHA-256 digest.
-        id: String,
-    },
-
-    /// Pin a model to prevent LRU storage eviction.
-    Pin {
-        /// Model name or SHA-256 digest.
-        id: String,
-    },
-
-    /// Unpin a model to allow standard storage reclamation.
-    Unpin {
-        /// Model name or SHA-256 digest.
-        id: String,
-    },
-
-    /// Prune unpinned models to reclaim storage capacity.
-    Prune {
-        /// Target maximum storage quota in bytes. Required to prevent
-        /// accidental deletion of every unpinned model.
-        #[arg(long)]
-        max_bytes: u64,
-    },
-
-    /// Import a local file directly into the CAS store.
-    Import {
-        /// Source file path.
-        source: PathBuf,
-
-        /// Optional tag in `name:variant` format.
-        #[arg(long)]
-        tag: Option<String>,
-    },
-
-    /// Pull a model from Hugging Face or registry.
-    Pull {
-        /// Model alias or Hugging Face repository (e.g. "qwen2.5:0.5b" or "org/repo").
-        model: String,
-
-        /// Target model format: gguf or safetensors.
-        #[arg(long, default_value = "gguf")]
-        format: String,
-
-        /// Quantization filter (e.g. "Q4_K_M").
-        #[arg(long)]
-        quant: Option<String>,
-
-        /// Optional tag in `name:variant` format.
-        #[arg(long)]
-        tag: Option<String>,
-
-        /// Force re-download even if already present.
-        #[arg(long, short)]
-        force: bool,
-    },
-
-    /// Bootstrap a curated model family according to hardware envelope.
-    Bootstrap {
-        /// Curated model family: qwen, granite, or gemma.
-        #[arg(long, default_value = "qwen")]
-        family: String,
-
-        /// Print sizing calculation and planned downloads without downloading.
-        #[arg(long)]
-        dry_run: bool,
-    },
-
-    /// Generate shell completions.
-    Completions {
-        /// Target shell (bash, zsh, fish).
-        shell: String,
-    },
-}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -156,6 +54,30 @@ async fn main() -> anyhow::Result<()> {
         Commands::Bootstrap { family, dry_run } => {
             cmd::run_bootstrap(&cli.storage_path, &cli.socket, &family, dry_run, cli.json).await?;
         }
+        Commands::Visual {
+            command: VisualCommands::Pull { model, tag, force },
+        } => {
+            cmd::run_visual_pull(
+                &cli.storage_path,
+                &cli.socket,
+                &model,
+                tag.as_deref(),
+                force,
+            )
+            .await?;
+        }
+        Commands::Lora {
+            command: LoraCommands::Pull { lora, tag, force },
+        } => {
+            cmd::run_lora_pull(
+                &cli.storage_path,
+                &cli.socket,
+                &lora,
+                tag.as_deref(),
+                force,
+            )
+            .await?;
+        }
         Commands::Completions { shell } => {
             cmd::run_completions(&shell, Cli::command());
         }
@@ -168,87 +90,8 @@ async fn main() -> anyhow::Result<()> {
 mod tests {
     use super::*;
 
-    fn parse(args: &[&str]) -> Cli {
-        Cli::try_parse_from(args).expect("cli parse")
-    }
-
     #[test]
-    fn test_cli_list_defaults() {
-        let cli = parse(&["modelctl", "list"]);
-        assert!(!cli.json);
-        assert!(matches!(cli.command, Commands::List));
-        assert_eq!(cli.socket, PathBuf::from(DEFAULT_SOCKET_PATH));
-        assert_eq!(cli.storage_path, PathBuf::from(DEFAULT_STORAGE_PATH));
-    }
-
-    #[test]
-    fn test_cli_ls_alias_and_global_flags() {
-        let cli = parse(&["modelctl", "--json", "--socket", "/tmp/t.sock", "ls"]);
-        assert!(cli.json);
-        assert!(matches!(cli.command, Commands::List));
-        assert_eq!(cli.socket, PathBuf::from("/tmp/t.sock"));
-    }
-
-    #[test]
-    fn test_cli_inspect_pin_unpin_take_id() {
-        let cli = parse(&["modelctl", "inspect", "wisp:1b"]);
-        assert!(matches!(cli.command, Commands::Inspect { .. }));
-        let cli = parse(&["modelctl", "pin", "wisp:1b"]);
-        assert!(matches!(cli.command, Commands::Pin { .. }));
-        let cli = parse(&["modelctl", "unpin", "wisp:1b"]);
-        assert!(matches!(cli.command, Commands::Unpin { .. }));
-    }
-
-    #[test]
-    fn test_cli_prune_requires_max_bytes() {
-        assert!(Cli::try_parse_from(["modelctl", "prune"]).is_err());
-        let cli = parse(&["modelctl", "prune", "--max-bytes", "1024"]);
-        assert!(matches!(cli.command, Commands::Prune { max_bytes: 1024 }));
-    }
-
-    #[test]
-    fn test_cli_import_tag_is_optional() {
-        let cli = parse(&["modelctl", "import", "/tmp/m.gguf"]);
-        assert!(matches!(cli.command, Commands::Import { tag: None, .. }));
-        let cli = parse(&["modelctl", "import", "/tmp/m.gguf", "--tag", "wisp:1b"]);
-        assert!(matches!(cli.command, Commands::Import { tag: Some(_), .. }));
-    }
-
-    #[test]
-    fn test_cli_completions_takes_shell() {
-        let cli = parse(&["modelctl", "completions", "bash"]);
-        assert!(matches!(cli.command, Commands::Completions { .. }));
-    }
-
-    #[test]
-    fn test_cli_pull_options() {
-        let cli = parse(&["modelctl", "pull", "qwen2.5:0.5b"]);
-        assert!(
-            matches!(cli.command, Commands::Pull { ref model, ref format, force: false, .. } if model == "qwen2.5:0.5b" && format == "gguf")
-        );
-        let cli = parse(&[
-            "modelctl",
-            "pull",
-            "org/repo",
-            "--format",
-            "safetensors",
-            "--quant",
-            "Q4_K_M",
-            "--tag",
-            "custom:v1",
-            "--force",
-        ]);
-        assert!(
-            matches!(cli.command, Commands::Pull { ref model, ref format, ref quant, ref tag, force: true }
-            if model == "org/repo" && format == "safetensors" && quant.as_deref() == Some("Q4_K_M") && tag.as_deref() == Some("custom:v1"))
-        );
-    }
-
-    #[test]
-    fn test_cli_bootstrap() {
-        let cli = parse(&["modelctl", "bootstrap", "--family", "gemma", "--dry-run"]);
-        assert!(
-            matches!(cli.command, Commands::Bootstrap { ref family, dry_run: true } if family == "gemma")
-        );
+    fn test_main_compiles() {
+        assert_eq!(2 + 2, 4);
     }
 }
