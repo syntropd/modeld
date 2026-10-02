@@ -170,6 +170,14 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn test_run_bootstrap_dry_run_phi() {
+        let dir = tempdir().unwrap();
+        let sock = dir.path().join("mock.sock");
+        let res = run_bootstrap(dir.path(), &sock, "phi", true, false).await;
+        assert!(res.is_ok());
+    }
+
+    #[tokio::test]
     async fn test_run_bootstrap_invalid_family() {
         let dir = tempdir().unwrap();
         let sock = dir.path().join("mock.sock");

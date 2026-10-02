@@ -13,6 +13,7 @@ pub enum ModelFamily {
     #[default]
     Qwen,
     Granite,
+    Phi,
     Gemma,
 }
 
@@ -23,9 +24,10 @@ impl FromStr for ModelFamily {
         match s.trim().to_ascii_lowercase().as_str() {
             "qwen" | "qwen2.5" => Ok(Self::Qwen),
             "granite" | "granite-3.0" | "granite3" => Ok(Self::Granite),
+            "phi" | "phi-3.5" | "phi3" | "phi4" => Ok(Self::Phi),
             "gemma" | "gemma2" | "gemma3" | "gemma4" => Ok(Self::Gemma),
             other => Err(anyhow!(
-                "Unknown model family '{}'. Supported: qwen, granite, gemma",
+                "Unknown model family '{}'. Supported: qwen, granite, phi, gemma",
                 other
             )),
         }
@@ -37,6 +39,7 @@ impl fmt::Display for ModelFamily {
         match self {
             Self::Qwen => write!(f, "qwen"),
             Self::Granite => write!(f, "granite"),
+            Self::Phi => write!(f, "phi"),
             Self::Gemma => write!(f, "gemma"),
         }
     }
@@ -114,6 +117,7 @@ mod tests {
             "granite".parse::<ModelFamily>().unwrap(),
             ModelFamily::Granite
         );
+        assert_eq!("phi".parse::<ModelFamily>().unwrap(), ModelFamily::Phi);
         assert_eq!("gemma".parse::<ModelFamily>().unwrap(), ModelFamily::Gemma);
         assert!("unknown".parse::<ModelFamily>().is_err());
     }

@@ -4,12 +4,14 @@
 //! memory budget calculation, and model selection.
 
 pub mod budget;
+pub mod families;
 pub mod family;
 pub mod plan;
 pub mod profiles;
 pub mod topology;
 
 pub use budget::MemoryBudget;
+pub use families::{family_catalog, lookup_family_entry, FamilyCatalogEntry};
 pub use family::BootstrapPlan;
 pub use family::ModelFamily;
 pub use family::ModelRole;
