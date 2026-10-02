@@ -69,14 +69,8 @@ async fn main() -> anyhow::Result<()> {
         Commands::Lora {
             command: LoraCommands::Pull { lora, tag, force },
         } => {
-            cmd::run_lora_pull(
-                &cli.storage_path,
-                &cli.socket,
-                &lora,
-                tag.as_deref(),
-                force,
-            )
-            .await?;
+            cmd::run_lora_pull(&cli.storage_path, &cli.socket, &lora, tag.as_deref(), force)
+                .await?;
         }
         Commands::Completions { shell } => {
             cmd::run_completions(&shell, Cli::command());

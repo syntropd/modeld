@@ -39,7 +39,11 @@ pub struct VisualModelMetadata {
 /// Inspects SafeTensors header stream to identify diffusion architecture and LoRA ranks.
 pub fn inspect_visual_metadata<R: Read>(reader: R) -> Result<VisualModelMetadata, ModeldError> {
     let raw = crate::format::safetensors::parse_safetensors_header(reader)?;
-    Ok(analyze_visual_attributes(&raw.attributes, raw.tensor_count, raw.parameter_count))
+    Ok(analyze_visual_attributes(
+        &raw.attributes,
+        raw.tensor_count,
+        raw.parameter_count,
+    ))
 }
 
 /// Analyzes tensor keys and metadata attributes to categorize visual model artifacts.
@@ -57,14 +61,26 @@ pub fn analyze_visual_attributes(
 
     for (k, v) in attrs {
         let lk = k.to_ascii_lowercase();
-        if lk.contains("double_blocks") || lk.contains("single_blocks") || lk.contains("transformer_blocks") || lk.contains("joint_blocks") {
+        if lk.contains("double_blocks")
+            || lk.contains("single_blocks")
+            || lk.contains("transformer_blocks")
+            || lk.contains("joint_blocks")
+        {
             is_dit = true;
             latent_channels = 16;
-        } else if lk.contains("down_blocks") || lk.contains("up_blocks") || lk.contains("input_blocks") || lk.contains("middle_block") {
+        } else if lk.contains("down_blocks")
+            || lk.contains("up_blocks")
+            || lk.contains("input_blocks")
+            || lk.contains("middle_block")
+        {
             is_unet = true;
         }
 
-        if lk.contains("lora_down") || lk.contains("lora_up") || lk.contains("lora_a") || lk.contains("lora_b") {
+        if lk.contains("lora_down")
+            || lk.contains("lora_up")
+            || lk.contains("lora_a")
+            || lk.contains("lora_b")
+        {
             is_lora = true;
             if lk.ends_with(".alpha") {
                 if let Ok(a) = v.parse::<f64>() {
@@ -94,7 +110,11 @@ pub fn analyze_visual_attributes(
 
     let kind = if is_lora {
         VisualModelKind::Lora {
-            rank: if detected_rank == 0 { 16 } else { detected_rank },
+            rank: if detected_rank == 0 {
+                16
+            } else {
+                detected_rank
+            },
             alpha: detected_alpha,
             target_architecture: arch,
         }
@@ -121,7 +141,10 @@ mod tests {
     #[test]
     fn test_detect_unet_base_model() {
         let mut attrs = HashMap::new();
-        attrs.insert("model.diffusion_model.input_blocks.0.0.weight".into(), "tensor".into());
+        attrs.insert(
+            "model.diffusion_model.input_blocks.0.0.weight".into(),
+            "tensor".into(),
+        );
         let meta = analyze_visual_attributes(&attrs, 120, 800_000_000);
         assert_eq!(
             meta.kind,
@@ -135,7 +158,10 @@ mod tests {
     #[test]
     fn test_detect_flux_dit_model() {
         let mut attrs = HashMap::new();
-        attrs.insert("double_blocks.0.img_attn.qkv.weight".into(), "tensor".into());
+        attrs.insert(
+            "double_blocks.0.img_attn.qkv.weight".into(),
+            "tensor".into(),
+        );
         let meta = analyze_visual_attributes(&attrs, 350, 12_000_000_000);
         assert_eq!(
             meta.kind,
@@ -149,7 +175,10 @@ mod tests {
     #[test]
     fn test_detect_lora_rank_and_alpha() {
         let mut attrs = HashMap::new();
-        attrs.insert("lora_unet_down_blocks_0_attentions_0_proj.lora_down.weight".into(), "tensor".into());
+        attrs.insert(
+            "lora_unet_down_blocks_0_attentions_0_proj.lora_down.weight".into(),
+            "tensor".into(),
+        );
         attrs.insert("network_dim".into(), "32".into());
         attrs.insert("network_alpha".into(), "16.0".into());
         let meta = analyze_visual_attributes(&attrs, 48, 15_000_000);
