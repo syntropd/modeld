@@ -1,7 +1,7 @@
 {
  "repo": "modeld",
- "rev": "a04798d",
- "dirty": true,
+ "rev": "9b23dbb",
+ "dirty": false,
  "pages": [
   {
    "path": "./crates/modelctl/src/client.rs",
@@ -285,7 +285,7 @@
   },
   {
    "path": "./crates/modeld-core/src/envelope/topology.rs",
-   "lines": 224,
+   "lines": 244,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 2
