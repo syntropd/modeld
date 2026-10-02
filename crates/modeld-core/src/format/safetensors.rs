@@ -80,6 +80,7 @@ pub fn parse_safetensors_header<R: Read>(
             }
         } else {
             tensor_count += 1;
+            attributes.insert(k.clone(), "tensor".to_string());
             if let Some(tensor_obj) = v.as_object() {
                 if let Some(shape_arr) = tensor_obj.get("shape").and_then(|s| s.as_array()) {
                     let mut prod: u64 = 1;

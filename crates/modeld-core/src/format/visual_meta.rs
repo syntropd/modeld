@@ -191,4 +191,23 @@ mod tests {
             }
         );
     }
+
+    #[test]
+    fn test_inspect_visual_metadata_from_stream() {
+        let json = r#"{"double_blocks.0.img_attn.qkv.weight":{"dtype":"F16","shape":[64,64]},"__metadata__":{"format":"pt"}}"#;
+        let mut buf = Vec::new();
+        buf.extend_from_slice(&(json.len() as u64).to_le_bytes());
+        buf.extend_from_slice(json.as_bytes());
+
+        let meta = inspect_visual_metadata(std::io::Cursor::new(buf)).unwrap();
+        assert_eq!(
+            meta.kind,
+            VisualModelKind::BaseModel {
+                architecture: DiffusionArchitecture::Dit,
+                latent_channels: 16,
+            }
+        );
+        assert_eq!(meta.tensor_count, 1);
+        assert_eq!(meta.parameter_count, 4096);
+    }
 }
