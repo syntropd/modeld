@@ -33,7 +33,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_lora_pull_compiles() {
-        assert_eq!(2 + 2, 4);
+    fn test_lora_pull_signature() {
+        let _ = run_lora_pull::<&std::path::Path>;
     }
 }

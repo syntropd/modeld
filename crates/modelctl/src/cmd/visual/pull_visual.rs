@@ -33,7 +33,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_visual_pull_compiles() {
-        assert_eq!(2 + 2, 4);
+    fn test_visual_pull_signature() {
+        let _ = run_visual_pull::<&std::path::Path>;
     }
 }
