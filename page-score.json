@@ -1,6 +1,6 @@
 {
  "repo": "modeld",
- "rev": "25bb78f",
+ "rev": "a04798d",
  "dirty": true,
  "pages": [
   {
@@ -250,7 +250,7 @@
   },
   {
    "path": "./crates/modeld-core/src/envelope/budget.rs",
-   "lines": 128,
+   "lines": 131,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 4
@@ -285,7 +285,7 @@
   },
   {
    "path": "./crates/modeld-core/src/envelope/topology.rs",
-   "lines": 207,
+   "lines": 224,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 2

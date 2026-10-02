@@ -65,6 +65,7 @@ mod tests {
             gpu_planes: vec![GpuPlaneInfo {
                 id: "gpu0".into(),
                 name: "RTX 4090".into(),
+                kind: "DiscreteGpu".into(),
                 total_memory: 24 * 1024 * 1024 * 1024,
                 available_memory: 24 * 1024 * 1024 * 1024,
             }],
@@ -105,12 +106,14 @@ mod tests {
                 GpuPlaneInfo {
                     id: "gpu0".into(),
                     name: "RTX 3090".into(),
+                    kind: "DiscreteGpu".into(),
                     total_memory: 24 * 1024 * 1024 * 1024,
                     available_memory: 24 * 1024 * 1024 * 1024,
                 },
                 GpuPlaneInfo {
                     id: "gpu1".into(),
                     name: "RTX 3090".into(),
+                    kind: "DiscreteGpu".into(),
                     total_memory: 24 * 1024 * 1024 * 1024,
                     available_memory: 24 * 1024 * 1024 * 1024,
                 },

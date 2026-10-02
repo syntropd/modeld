@@ -14,6 +14,8 @@ const RPC_TIMEOUT: Duration = Duration::from_millis(500);
 pub struct GpuPlaneInfo {
     pub id: String,
     pub name: String,
+    #[serde(default)]
+    pub kind: String,
     pub total_memory: u64,
     pub available_memory: u64,
 }
@@ -28,9 +30,13 @@ pub struct HardwareTopology {
 }
 
 impl HardwareTopology {
-    /// Sum of total GPU VRAM across all physical GPU planes.
+    /// Sum of total GPU VRAM across all physical GPU planes, excluding Integrated UMA.
     pub fn sum_gpu_vram(&self) -> u64 {
-        self.gpu_planes.iter().map(|g| g.total_memory).sum()
+        self.gpu_planes
+            .iter()
+            .filter(|g| g.kind != "IntegratedUma" && !g.kind.eq_ignore_ascii_case("integrateduma"))
+            .map(|g| g.total_memory)
+            .sum()
     }
 }
 
@@ -76,7 +82,7 @@ pub fn query_varlink_topology(socket_path: &Path) -> Result<HardwareTopology> {
             let id = p.get("id").and_then(|v| v.as_str()).unwrap_or("");
             let name = p.get("name").and_then(|v| v.as_str()).unwrap_or("");
             let kind = p.get("kind").and_then(|v| v.as_str()).unwrap_or("");
-            if kind == "CpuMatrixExtension" || id == "cpu-host" {
+            if kind == "CpuMatrixExtension" || kind == "IntegratedUma" || id == "cpu-host" {
                 continue;
             }
             let total = p.get("total_memory").and_then(|v| v.as_u64()).unwrap_or(0);
@@ -87,6 +93,7 @@ pub fn query_varlink_topology(socket_path: &Path) -> Result<HardwareTopology> {
             gpu_planes.push(GpuPlaneInfo {
                 id: id.to_string(),
                 name: name.to_string(),
+                kind: kind.to_string(),
                 total_memory: total,
                 available_memory: avail,
             });
@@ -188,20 +195,30 @@ mod tests {
                 GpuPlaneInfo {
                     id: "gpu0".into(),
                     name: "NVIDIA RTX 4090".into(),
+                    kind: "DiscreteGpu".into(),
                     total_memory: 24 * 1024 * 1024 * 1024,
                     available_memory: 22 * 1024 * 1024 * 1024,
                 },
                 GpuPlaneInfo {
                     id: "gpu1".into(),
                     name: "NVIDIA RTX 4090".into(),
+                    kind: "DiscreteGpu".into(),
                     total_memory: 24 * 1024 * 1024 * 1024,
                     available_memory: 22 * 1024 * 1024 * 1024,
+                },
+                GpuPlaneInfo {
+                    id: "uma0".into(),
+                    name: "Intel Iris Xe".into(),
+                    kind: "IntegratedUma".into(),
+                    total_memory: 8 * 1024 * 1024 * 1024,
+                    available_memory: 8 * 1024 * 1024 * 1024,
                 },
             ],
             total_ram: 64 * 1024 * 1024 * 1024,
             available_ram: 48 * 1024 * 1024 * 1024,
             cpu_cores: 32,
         };
+        // 24 + 24 = 48 GB; the 8 GB IntegratedUma plane must be filtered out
         assert_eq!(topo.sum_gpu_vram(), 48 * 1024 * 1024 * 1024);
     }
 }
