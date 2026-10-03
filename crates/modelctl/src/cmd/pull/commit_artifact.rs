@@ -27,7 +27,17 @@ pub fn commit_artifact(commit: &ArtifactCommit) -> Result<()> {
     // 1. Commit to CAS: /var/lib/models/cas/sha256-<digest>.<ext>
     let cas_filename = format!("sha256-{}.{}", commit.digest, ext);
     let cas_dest = cas_dir.join(&cas_filename);
-    fs::rename(commit.stage_path, &cas_dest).context("Failed to commit CAS artifact")?;
+    if let Err(e) = fs::rename(commit.stage_path, &cas_dest) {
+        if e.kind() == std::io::ErrorKind::PermissionDenied {
+            return Err(anyhow::anyhow!(
+                "Permission denied committing CAS artifact to {}. \
+                Ensure your user belongs to the 'syntrop' group or re-run with sudo: {}",
+                cas_dest.display(),
+                e
+            ));
+        }
+        return Err(anyhow::anyhow!("Failed to commit CAS artifact: {}", e));
+    }
 
     // 2. Maintain standard CAS blob path compatibility: cas/blobs/sha256/<digest>
     let blob_dir = cas_dir.join("blobs").join("sha256");
@@ -41,14 +51,45 @@ pub fn commit_artifact(commit: &ArtifactCommit) -> Result<()> {
 
     // 3. Write plain text tag: /var/lib/models/tags/<name>/<tag>
     let tag_dir = root.join("tags").join(commit.name);
-    fs::create_dir_all(&tag_dir).context("Failed to create tags directory")?;
+    if let Err(e) = fs::create_dir_all(&tag_dir) {
+        if e.kind() == std::io::ErrorKind::PermissionDenied {
+            return Err(anyhow::anyhow!(
+                "Permission denied creating tags directory at {}. \
+                Ensure your user belongs to the 'syntrop' group or re-run with sudo: {}",
+                tag_dir.display(),
+                e
+            ));
+        }
+        return Err(anyhow::anyhow!("Failed to create tags directory: {}", e));
+    }
     let tag_file = tag_dir.join(commit.tag);
-    fs::write(&tag_file, commit.digest.as_bytes()).context("Failed to write tag file")?;
+    if let Err(e) = fs::write(&tag_file, commit.digest.as_bytes()) {
+        if e.kind() == std::io::ErrorKind::PermissionDenied {
+            return Err(anyhow::anyhow!(
+                "Permission denied writing tag file at {}. \
+                Ensure your user belongs to the 'syntrop' group or re-run with sudo: {}",
+                tag_file.display(),
+                e
+            ));
+        }
+        return Err(anyhow::anyhow!("Failed to write tag file: {}", e));
+    }
 
     // 4. Create format-specific symlinks: /var/lib/models/<format>/<name>.<ext>
     // Also create tagged variants: <name>:<tag>.<ext> and <name>-<tag>.<ext>
     let fmt_dir = root.join(ext);
-    fs::create_dir_all(&fmt_dir).context(format!("Failed to create {} directory", ext))?;
+    if let Err(e) = fs::create_dir_all(&fmt_dir) {
+        if e.kind() == std::io::ErrorKind::PermissionDenied {
+            return Err(anyhow::anyhow!(
+                "Permission denied creating {} directory at {}. \
+                Ensure your user belongs to the 'syntrop' group or re-run with sudo: {}",
+                ext,
+                fmt_dir.display(),
+                e
+            ));
+        }
+        return Err(anyhow::anyhow!("Failed to create {} directory: {}", ext, e));
+    }
     let symlink_dest = fmt_dir.join(format!("{}.{}", commit.name, ext));
 
     #[cfg(unix)]

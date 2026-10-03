@@ -16,6 +16,9 @@ pub const DEFAULT_STORAGE_PATH: &str = "/var/lib/models";
 /// Default Varlink Unix domain socket path.
 pub const DEFAULT_SOCKET_PATH: &str = "/run/syntrop/io.syntrop.Model1";
 
+/// Default Varlink Unix domain socket path for inferenced.
+pub const DEFAULT_INFERENCE_SOCKET_PATH: &str = "/run/syntrop/io.syntrop.Inference1";
+
 /// Default maximum storage capacity in bytes (64 GiB).
 pub const DEFAULT_MAX_STORAGE_BYTES: u64 = 64 * 1024 * 1024 * 1024;
 

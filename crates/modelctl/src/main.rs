@@ -52,7 +52,15 @@ async fn main() -> anyhow::Result<()> {
             .await?;
         }
         Commands::Bootstrap { family, dry_run } => {
-            cmd::run_bootstrap(&cli.storage_path, &cli.socket, &family, dry_run, cli.json).await?;
+            cmd::run_bootstrap(
+                &cli.storage_path,
+                &cli.socket,
+                &cli.inference_socket,
+                &family,
+                dry_run,
+                cli.json,
+            )
+            .await?;
         }
         Commands::Visual {
             command: VisualCommands::Pull { model, tag, force },

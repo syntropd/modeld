@@ -76,7 +76,21 @@ pub async fn run_pull<P: AsRef<Path>>(
     let pb = create_download_progress(total_bytes, &resolved.name);
 
     let incoming_dir = cas_dir.join("incoming");
-    fs::create_dir_all(&incoming_dir).context("Failed to create incoming directory")?;
+    if let Err(e) = fs::create_dir_all(&incoming_dir) {
+        if e.kind() == std::io::ErrorKind::PermissionDenied {
+            return Err(anyhow!(
+                "Permission denied creating incoming directory at {}. \
+                Ensure your user belongs to the 'syntrop' group or re-run with sudo: {}",
+                incoming_dir.display(),
+                e
+            ));
+        }
+        return Err(anyhow!(
+            "Failed to create incoming directory at {}: {}",
+            incoming_dir.display(),
+            e
+        ));
+    }
 
     use std::sync::atomic::{AtomicU64, Ordering};
     static DOWNLOAD_COUNTER: AtomicU64 = AtomicU64::new(1);
@@ -96,7 +110,24 @@ pub async fn run_pull<P: AsRef<Path>>(
         nanos
     );
     let stage_path = incoming_dir.join(stage_filename);
-    let mut stage_file = File::create(&stage_path).context("Failed to create staging file")?;
+    let mut stage_file = match File::create(&stage_path) {
+        Ok(f) => f,
+        Err(e) => {
+            if e.kind() == std::io::ErrorKind::PermissionDenied {
+                return Err(anyhow!(
+                    "Permission denied creating staging file at {}. \
+                    Ensure your user belongs to the 'syntrop' group or re-run with sudo: {}",
+                    stage_path.display(),
+                    e
+                ));
+            }
+            return Err(anyhow!(
+                "Failed to create staging file at {}: {}",
+                stage_path.display(),
+                e
+            ));
+        }
+    };
 
     struct StagingGuard<'a> {
         path: &'a Path,

@@ -1,5 +1,4 @@
-//! Hardware topology discovery via Varlink or local system fallback.
-
+use crate::config::DEFAULT_INFERENCE_SOCKET_PATH;
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use std::io::{BufRead, BufReader, Write};
@@ -161,6 +160,14 @@ pub fn query_or_fallback_topology(socket_path: &Path) -> HardwareTopology {
     if let Ok(topo) = query_varlink_topology(socket_path) {
         if topo.total_ram > 0 {
             return topo;
+        }
+    }
+    let default_infer_sock = Path::new(DEFAULT_INFERENCE_SOCKET_PATH);
+    if socket_path != default_infer_sock {
+        if let Ok(topo) = query_varlink_topology(default_infer_sock) {
+            if topo.total_ram > 0 {
+                return topo;
+            }
         }
     }
     let (total_ram, available_ram, cpu_cores) = read_system_ram_fallback();

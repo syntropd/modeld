@@ -9,6 +9,7 @@ use std::path::Path;
 pub async fn run_bootstrap<P: AsRef<Path>>(
     storage_root: P,
     socket_path: P,
+    inference_socket_path: P,
     family_str: &str,
     dry_run: bool,
     json_output: bool,
@@ -16,8 +17,9 @@ pub async fn run_bootstrap<P: AsRef<Path>>(
     let family = family_str.parse::<ModelFamily>()?;
     let root = storage_root.as_ref().to_path_buf();
     let socket = socket_path.as_ref().to_path_buf();
+    let inference_socket = inference_socket_path.as_ref().to_path_buf();
 
-    let topo = query_or_fallback_topology(&socket);
+    let topo = query_or_fallback_topology(&inference_socket);
     let budget = MemoryBudget::from_topology(&topo);
     let plan = BootstrapPlan::plan(family, &budget);
 
@@ -157,7 +159,7 @@ mod tests {
     async fn test_run_bootstrap_dry_run_success() {
         let dir = tempdir().unwrap();
         let sock = dir.path().join("mock.sock");
-        let res = run_bootstrap(dir.path(), &sock, "qwen", true, false).await;
+        let res = run_bootstrap(dir.path(), &sock, &sock, "qwen", true, false).await;
         assert!(res.is_ok());
     }
 
@@ -165,7 +167,7 @@ mod tests {
     async fn test_run_bootstrap_dry_run_json_output() {
         let dir = tempdir().unwrap();
         let sock = dir.path().join("mock.sock");
-        let res = run_bootstrap(dir.path(), &sock, "granite", true, true).await;
+        let res = run_bootstrap(dir.path(), &sock, &sock, "granite", true, true).await;
         assert!(res.is_ok());
     }
 
@@ -173,7 +175,7 @@ mod tests {
     async fn test_run_bootstrap_dry_run_phi() {
         let dir = tempdir().unwrap();
         let sock = dir.path().join("mock.sock");
-        let res = run_bootstrap(dir.path(), &sock, "phi", true, false).await;
+        let res = run_bootstrap(dir.path(), &sock, &sock, "phi", true, false).await;
         assert!(res.is_ok());
     }
 
@@ -181,7 +183,7 @@ mod tests {
     async fn test_run_bootstrap_invalid_family() {
         let dir = tempdir().unwrap();
         let sock = dir.path().join("mock.sock");
-        let res = run_bootstrap(dir.path(), &sock, "invalid-family-xyz", true, false).await;
+        let res = run_bootstrap(dir.path(), &sock, &sock, "invalid-family-xyz", true, false).await;
         assert!(res.is_err());
     }
 }

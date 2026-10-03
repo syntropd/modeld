@@ -7,7 +7,7 @@
 [![Language: Rust](https://img.shields.io/badge/Language-Pure%20Rust-orange.svg)](https://www.rust-lang.org/)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Zero C Dependencies](https://img.shields.io/badge/Dependencies-Zero%20C%20Libs-green.svg)](#architecture)
-[![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-blue.svg)](CHANGELOG.md)
+[![Version: 0.5.0](https://img.shields.io/badge/Version-0.5.0-blue.svg)](CHANGELOG.md)
 
 ---
 

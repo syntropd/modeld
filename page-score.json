@@ -1,6 +1,6 @@
 {
  "repo": "modeld",
- "rev": "d002872",
+ "rev": "0c84e74",
  "dirty": false,
  "pages": [
   {
@@ -12,7 +12,7 @@
   },
   {
    "path": "./crates/modelctl/src/cli.rs",
-   "lines": 172,
+   "lines": 187,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 2
@@ -68,14 +68,14 @@
   },
   {
    "path": "./crates/modelctl/src/cmd/pull/bootstrap.rs",
-   "lines": 187,
+   "lines": 189,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 2
   },
   {
    "path": "./crates/modelctl/src/cmd/pull/commit_artifact.rs",
-   "lines": 85,
+   "lines": 126,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 2
@@ -124,7 +124,7 @@
   },
   {
    "path": "./crates/modelctl/src/cmd/pull/stream.rs",
-   "lines": 212,
+   "lines": 243,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 2
@@ -159,7 +159,7 @@
   },
   {
    "path": "./crates/modelctl/src/main.rs",
-   "lines": 89,
+   "lines": 97,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -215,14 +215,14 @@
   },
   {
    "path": "./crates/modeld-core/src/config/modeld_config.rs",
-   "lines": 59,
+   "lines": 62,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 1
   },
   {
    "path": "./crates/modeld-core/src/config/mod.rs",
-   "lines": 11,
+   "lines": 12,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -292,7 +292,7 @@
   },
   {
    "path": "./crates/modeld-core/src/envelope/topology.rs",
-   "lines": 244,
+   "lines": 251,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 2

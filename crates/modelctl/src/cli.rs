@@ -1,7 +1,9 @@
 //! CLI argument structures and parser definitions for modelctl.
 
 use clap::{Parser, Subcommand};
-use modeld_core::config::{DEFAULT_SOCKET_PATH, DEFAULT_STORAGE_PATH};
+use modeld_core::config::{
+    DEFAULT_INFERENCE_SOCKET_PATH, DEFAULT_SOCKET_PATH, DEFAULT_STORAGE_PATH,
+};
 use std::path::PathBuf;
 
 #[derive(Parser, Debug)]
@@ -10,6 +12,10 @@ pub struct Cli {
     /// Varlink Unix domain socket path.
     #[arg(long, global = true, default_value = DEFAULT_SOCKET_PATH)]
     pub socket: PathBuf,
+
+    /// Varlink Unix domain socket path for inferenced.
+    #[arg(long, global = true, default_value = DEFAULT_INFERENCE_SOCKET_PATH)]
+    pub inference_socket: PathBuf,
 
     /// CAS storage root path.
     #[arg(long, global = true, default_value = DEFAULT_STORAGE_PATH)]
@@ -168,5 +174,14 @@ mod tests {
 
         let cli_lora = parse(&["modelctl", "lora", "pull", "org/adapter"]);
         assert!(matches!(cli_lora.command, Commands::Lora { .. }));
+    }
+
+    #[test]
+    fn test_cli_inference_socket_flag() {
+        let cli = parse(&["modelctl", "bootstrap", "--inference-socket", "/run/custom.sock"]);
+        assert_eq!(cli.inference_socket, PathBuf::from("/run/custom.sock"));
+
+        let cli2 = parse(&["modelctl", "--inference-socket", "/run/custom2.sock", "bootstrap"]);
+        assert_eq!(cli2.inference_socket, PathBuf::from("/run/custom2.sock"));
     }
 }
