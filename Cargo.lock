@@ -747,7 +747,7 @@ dependencies = [
 
 [[package]]
 name = "modelctl"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -846,7 +846,7 @@ dependencies = [
 
 [[package]]
 name = "qa-edge"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "anyhow",
  "syntrop-modeld",
@@ -857,7 +857,7 @@ dependencies = [
 
 [[package]]
 name = "qa-unit"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "anyhow",
  "modelctl",
@@ -1316,7 +1316,7 @@ dependencies = [
 
 [[package]]
 name = "syntrop-modeld"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "anyhow",
  "libc",
@@ -1333,7 +1333,7 @@ dependencies = [
 
 [[package]]
 name = "syntrop-modeld-core"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "anyhow",
  "libc",
