@@ -178,10 +178,20 @@ mod tests {
 
     #[test]
     fn test_cli_inference_socket_flag() {
-        let cli = parse(&["modelctl", "bootstrap", "--inference-socket", "/run/custom.sock"]);
+        let cli = parse(&[
+            "modelctl",
+            "bootstrap",
+            "--inference-socket",
+            "/run/custom.sock",
+        ]);
         assert_eq!(cli.inference_socket, PathBuf::from("/run/custom.sock"));
 
-        let cli2 = parse(&["modelctl", "--inference-socket", "/run/custom2.sock", "bootstrap"]);
+        let cli2 = parse(&[
+            "modelctl",
+            "--inference-socket",
+            "/run/custom2.sock",
+            "bootstrap",
+        ]);
         assert_eq!(cli2.inference_socket, PathBuf::from("/run/custom2.sock"));
     }
 }

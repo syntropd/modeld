@@ -1,7 +1,7 @@
 {
  "repo": "modeld",
- "rev": "0c84e74",
- "dirty": false,
+ "rev": "b7cb15e",
+ "dirty": true,
  "pages": [
   {
    "path": "./crates/modelctl/src/client.rs",
@@ -12,7 +12,7 @@
   },
   {
    "path": "./crates/modelctl/src/cli.rs",
-   "lines": 187,
+   "lines": 197,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 2
