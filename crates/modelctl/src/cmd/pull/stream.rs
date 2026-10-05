@@ -59,8 +59,9 @@ pub async fn run_pull<P: AsRef<Path>>(
         }
     }
 
-    let mut resp = client
-        .get(&resolved.download_url)
+    let req = client.get(&resolved.download_url);
+    let req = super::auth::apply_hf_auth(req, &resolved.download_url);
+    let mut resp = req
         .send()
         .await
         .with_context(|| format!("Failed to connect to {}", resolved.download_url))?;
@@ -182,7 +183,9 @@ pub async fn run_pull<P: AsRef<Path>>(
 
     if let Some(tok_url) = &resolved.tokenizer_url {
         println!("  Downloading companion tokenizer.json...");
-        if let Ok(tok_resp) = client.get(tok_url).send().await {
+        let tok_req = client.get(tok_url);
+        let tok_req = super::auth::apply_hf_auth(tok_req, tok_url);
+        if let Ok(tok_resp) = tok_req.send().await {
             if tok_resp.status().is_success() {
                 if let Ok(bytes) = tok_resp.bytes().await {
                     let _ = commit_tokenizer(root, &resolved.name, &bytes);
