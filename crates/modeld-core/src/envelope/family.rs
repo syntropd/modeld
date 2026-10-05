@@ -15,6 +15,7 @@ pub enum ModelFamily {
     Granite,
     Phi,
     Gemma,
+    BitNet,
 }
 
 impl FromStr for ModelFamily {
@@ -26,8 +27,9 @@ impl FromStr for ModelFamily {
             "granite" | "granite-3.0" | "granite3" => Ok(Self::Granite),
             "phi" | "phi-3.5" | "phi3" | "phi4" => Ok(Self::Phi),
             "gemma" | "gemma2" | "gemma3" | "gemma4" => Ok(Self::Gemma),
+            "bitnet" | "bitnet-b1.58" | "ternary" => Ok(Self::BitNet),
             other => Err(anyhow!(
-                "Unknown model family '{}'. Supported: qwen, granite, phi, gemma",
+                "Unknown model family '{}'. Supported: qwen, granite, phi, gemma, bitnet",
                 other
             )),
         }
@@ -41,6 +43,7 @@ impl fmt::Display for ModelFamily {
             Self::Granite => write!(f, "granite"),
             Self::Phi => write!(f, "phi"),
             Self::Gemma => write!(f, "gemma"),
+            Self::BitNet => write!(f, "bitnet"),
         }
     }
 }

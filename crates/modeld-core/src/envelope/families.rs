@@ -77,6 +77,17 @@ pub fn family_catalog() -> &'static [FamilyCatalogEntry] {
             min_vram_mb: 6348,
             recommended_vram_mb: 12288,
         },
+        FamilyCatalogEntry {
+            family: ModelFamily::BitNet,
+            name: "bitnet",
+            default_profile: "Ultra-Low Power CPU & Edge",
+            cpu_draft_model: "bitnet:2b",
+            primary_gpu_model: "bitnet:2b",
+            specialist_focus: "Zero-VRAM CPU inference, 1.58-bit ternary math",
+            vocab_size: 32000,
+            min_vram_mb: 0,
+            recommended_vram_mb: 0,
+        },
     ]
 }
 
@@ -136,6 +147,28 @@ pub fn plan_phi(budget: &MemoryBudget) -> BootstrapPlan {
     }
 }
 
+/// Generate bootstrap plan for BitNet family.
+pub fn plan_bitnet(budget: &MemoryBudget) -> BootstrapPlan {
+    let draft = ModelTarget {
+        role: ModelRole::CpuDraft,
+        name: "bitnet".into(),
+        tag: "2b".into(),
+        repo: "1bitLLM/bitnet_b1_58-2B4T".into(),
+        file: "bitnet_b1_58-2B4T.gguf".into(),
+        quant: "TL1".into(),
+        estimated_bytes: (550.0 * 1024.0 * 1024.0) as u64,
+    };
+
+    BootstrapPlan {
+        family: ModelFamily::BitNet,
+        budget: budget.clone(),
+        draft,
+        primary: None,
+        deep_reasoner: None,
+        vision_tower: None,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -143,11 +176,12 @@ mod tests {
     #[test]
     fn test_family_catalog_entries() {
         let catalog = family_catalog();
-        assert_eq!(catalog.len(), 4);
+        assert_eq!(catalog.len(), 5);
         assert!(catalog.iter().any(|c| c.family == ModelFamily::Qwen));
         assert!(catalog.iter().any(|c| c.family == ModelFamily::Granite));
         assert!(catalog.iter().any(|c| c.family == ModelFamily::Phi));
         assert!(catalog.iter().any(|c| c.family == ModelFamily::Gemma));
+        assert!(catalog.iter().any(|c| c.family == ModelFamily::BitNet));
     }
 
     #[test]
@@ -156,5 +190,9 @@ mod tests {
         assert_eq!(phi.cpu_draft_model, "phi-3.5-mini:3.8b");
         assert_eq!(phi.primary_gpu_model, "phi-4:14b");
         assert_eq!(phi.vocab_size, 100352);
+
+        let bitnet = lookup_family_entry(ModelFamily::BitNet).unwrap();
+        assert_eq!(bitnet.cpu_draft_model, "bitnet:2b");
+        assert_eq!(bitnet.min_vram_mb, 0);
     }
 }

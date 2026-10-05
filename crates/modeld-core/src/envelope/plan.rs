@@ -1,7 +1,7 @@
 //! Sizing algorithms for family speculative pairings and quantization ladders.
 
 use super::budget::MemoryBudget;
-use super::families::plan_phi;
+use super::families::{plan_bitnet, plan_phi};
 use super::family::{BootstrapPlan, ModelFamily};
 use super::profiles::{plan_gemma, plan_granite, plan_qwen};
 
@@ -11,6 +11,7 @@ pub fn plan_family(family: ModelFamily, budget: &MemoryBudget) -> BootstrapPlan 
         ModelFamily::Granite => plan_granite(budget),
         ModelFamily::Phi => plan_phi(budget),
         ModelFamily::Gemma => plan_gemma(budget),
+        ModelFamily::BitNet => plan_bitnet(budget),
     }
 }
 
@@ -76,5 +77,21 @@ mod tests {
         let plan = plan_family(ModelFamily::Phi, &budget);
         assert_eq!(plan.draft.name, "phi-3.5-mini");
         assert_eq!(plan.primary.as_ref().unwrap().name, "phi-4");
+    }
+
+    #[test]
+    fn test_bitnet_plan_cpu_only() {
+        let budget = MemoryBudget {
+            vram_budget_bytes: 0,
+            ram_budget_bytes: 2 * 1024 * 1024 * 1024,
+            total_gpu_vram_bytes: 0,
+            available_ram_bytes: 4 * 1024 * 1024 * 1024,
+            cpu_cores: 4,
+        };
+        let plan = plan_family(ModelFamily::BitNet, &budget);
+        assert_eq!(plan.draft.name, "bitnet");
+        assert_eq!(plan.draft.tag, "2b");
+        assert_eq!(plan.draft.quant, "TL1");
+        assert!(plan.primary.is_none());
     }
 }

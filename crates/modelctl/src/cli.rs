@@ -94,7 +94,7 @@ pub enum Commands {
 
     /// Bootstrap a curated model family according to hardware envelope.
     Bootstrap {
-        /// Curated model family: qwen, granite, phi, or gemma.
+        /// Curated model family: qwen, granite, phi, gemma, or bitnet.
         #[arg(long, default_value = "qwen")]
         family: String,
 
