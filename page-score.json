@@ -1,6 +1,6 @@
 {
  "repo": "modeld",
- "rev": "1c541fb",
+ "rev": "827c625",
  "dirty": false,
  "pages": [
   {
@@ -67,6 +67,13 @@
    "reach": 2
   },
   {
+   "path": "./crates/modelctl/src/cmd/pull/auth.rs",
+   "lines": 69,
+   "bin_bytes": null,
+   "heat_pct": null,
+   "reach": 2
+  },
+  {
    "path": "./crates/modelctl/src/cmd/pull/bootstrap.rs",
    "lines": 189,
    "bin_bytes": null,
@@ -82,7 +89,7 @@
   },
   {
    "path": "./crates/modelctl/src/cmd/pull/mod.rs",
-   "lines": 10,
+   "lines": 12,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -124,7 +131,7 @@
   },
   {
    "path": "./crates/modelctl/src/cmd/pull/stream.rs",
-   "lines": 243,
+   "lines": 246,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 2
@@ -365,7 +372,7 @@
    "lines": 229,
    "bin_bytes": null,
    "heat_pct": null,
-   "reach": 4
+   "reach": 3
   },
   {
    "path": "./crates/modeld-daemon/src/fd_server.rs",
