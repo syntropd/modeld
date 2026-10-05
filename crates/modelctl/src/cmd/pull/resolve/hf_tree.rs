@@ -20,7 +20,9 @@ pub async fn resolve_hf_repo(
     tag_override: Option<&str>,
 ) -> Result<ResolvedModel> {
     let api_url = format!("https://huggingface.co/api/models/{}/tree/main", repo);
-    let req = client.get(&api_url).header("User-Agent", "syntrop-modelctl");
+    let req = client
+        .get(&api_url)
+        .header("User-Agent", "syntrop-modelctl");
     let req = crate::cmd::pull::auth::apply_hf_auth(req, &api_url);
     let resp = req
         .send()
