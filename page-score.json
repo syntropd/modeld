@@ -1,6 +1,6 @@
 {
  "repo": "modeld",
- "rev": "827c625",
+ "rev": "3c80ccd",
  "dirty": false,
  "pages": [
   {
@@ -89,7 +89,7 @@
   },
   {
    "path": "./crates/modelctl/src/cmd/pull/mod.rs",
-   "lines": 12,
+   "lines": 11,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 0
@@ -110,7 +110,7 @@
   },
   {
    "path": "./crates/modelctl/src/cmd/pull/resolve/hf_tree.rs",
-   "lines": 119,
+   "lines": 121,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 1
