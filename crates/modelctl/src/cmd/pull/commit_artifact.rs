@@ -31,7 +31,7 @@ pub fn commit_artifact(commit: &ArtifactCommit) -> Result<()> {
         if e.kind() == std::io::ErrorKind::PermissionDenied {
             return Err(anyhow::anyhow!(
                 "Permission denied committing CAS artifact to {}. \
-                Ensure your user belongs to the 'syntrop' group or re-run with sudo: {}",
+                Ensure your user belongs to the 'syntrop' group (try: newgrp syntrop) or re-run with sudo: {}",
                 cas_dest.display(),
                 e
             ));
@@ -55,7 +55,7 @@ pub fn commit_artifact(commit: &ArtifactCommit) -> Result<()> {
         if e.kind() == std::io::ErrorKind::PermissionDenied {
             return Err(anyhow::anyhow!(
                 "Permission denied creating tags directory at {}. \
-                Ensure your user belongs to the 'syntrop' group or re-run with sudo: {}",
+                Ensure your user belongs to the 'syntrop' group (try: newgrp syntrop) or re-run with sudo: {}",
                 tag_dir.display(),
                 e
             ));
@@ -67,7 +67,7 @@ pub fn commit_artifact(commit: &ArtifactCommit) -> Result<()> {
         if e.kind() == std::io::ErrorKind::PermissionDenied {
             return Err(anyhow::anyhow!(
                 "Permission denied writing tag file at {}. \
-                Ensure your user belongs to the 'syntrop' group or re-run with sudo: {}",
+                Ensure your user belongs to the 'syntrop' group (try: newgrp syntrop) or re-run with sudo: {}",
                 tag_file.display(),
                 e
             ));
@@ -82,7 +82,7 @@ pub fn commit_artifact(commit: &ArtifactCommit) -> Result<()> {
         if e.kind() == std::io::ErrorKind::PermissionDenied {
             return Err(anyhow::anyhow!(
                 "Permission denied creating {} directory at {}. \
-                Ensure your user belongs to the 'syntrop' group or re-run with sudo: {}",
+                Ensure your user belongs to the 'syntrop' group (try: newgrp syntrop) or re-run with sudo: {}",
                 ext,
                 fmt_dir.display(),
                 e

@@ -81,7 +81,7 @@ pub async fn run_pull<P: AsRef<Path>>(
         if e.kind() == std::io::ErrorKind::PermissionDenied {
             return Err(anyhow!(
                 "Permission denied creating incoming directory at {}. \
-                Ensure your user belongs to the 'syntrop' group or re-run with sudo: {}",
+                Ensure your user belongs to the 'syntrop' group (try: newgrp syntrop) or re-run with sudo: {}",
                 incoming_dir.display(),
                 e
             ));
@@ -117,7 +117,7 @@ pub async fn run_pull<P: AsRef<Path>>(
             if e.kind() == std::io::ErrorKind::PermissionDenied {
                 return Err(anyhow!(
                     "Permission denied creating staging file at {}. \
-                    Ensure your user belongs to the 'syntrop' group or re-run with sudo: {}",
+                    Ensure your user belongs to the 'syntrop' group (try: newgrp syntrop) or re-run with sudo: {}",
                     stage_path.display(),
                     e
                 ));
