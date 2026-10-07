@@ -69,10 +69,10 @@ pub fn family_catalog() -> &'static [FamilyCatalogEntry] {
         FamilyCatalogEntry {
             family: ModelFamily::Gemma,
             name: "gemma",
-            default_profile: "Multimodal Knowledge",
+            default_profile: "Multimodal Knowledge & On-Device Search",
             cpu_draft_model: "gemma-2:2b",
             primary_gpu_model: "gemma-2:9b",
-            specialist_focus: "PaliGemma 2 UI grounding, multilingual",
+            specialist_focus: "EmbeddingGemma 2 multimodal embeddings, PaliGemma 2, multilingual",
             vocab_size: 256000,
             min_vram_mb: 6348,
             recommended_vram_mb: 12288,
@@ -144,6 +144,7 @@ pub fn plan_phi(budget: &MemoryBudget) -> BootstrapPlan {
         primary,
         deep_reasoner: None,
         vision_tower: None,
+        embedder: None,
     }
 }
 
@@ -166,6 +167,7 @@ pub fn plan_bitnet(budget: &MemoryBudget) -> BootstrapPlan {
         primary: None,
         deep_reasoner: None,
         vision_tower: None,
+        embedder: None,
     }
 }
 

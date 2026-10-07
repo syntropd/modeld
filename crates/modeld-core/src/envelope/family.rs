@@ -11,10 +11,10 @@ use std::str::FromStr;
 #[serde(rename_all = "lowercase")]
 pub enum ModelFamily {
     #[default]
+    Gemma,
     Qwen,
     Granite,
     Phi,
-    Gemma,
     BitNet,
 }
 
@@ -23,13 +23,13 @@ impl FromStr for ModelFamily {
 
     fn from_str(s: &str) -> Result<Self> {
         match s.trim().to_ascii_lowercase().as_str() {
+            "gemma" | "gemma2" | "gemma3" | "gemma4" => Ok(Self::Gemma),
             "qwen" | "qwen2.5" => Ok(Self::Qwen),
             "granite" | "granite-3.0" | "granite3" => Ok(Self::Granite),
             "phi" | "phi-3.5" | "phi3" | "phi4" => Ok(Self::Phi),
-            "gemma" | "gemma2" | "gemma3" | "gemma4" => Ok(Self::Gemma),
             "bitnet" | "bitnet-b1.58" | "ternary" => Ok(Self::BitNet),
             other => Err(anyhow!(
-                "Unknown model family '{}'. Supported: qwen, granite, phi, gemma, bitnet",
+                "Unknown model family '{}'. Supported: gemma, qwen, granite, phi, bitnet",
                 other
             )),
         }
@@ -39,10 +39,10 @@ impl FromStr for ModelFamily {
 impl fmt::Display for ModelFamily {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Self::Gemma => write!(f, "gemma"),
             Self::Qwen => write!(f, "qwen"),
             Self::Granite => write!(f, "granite"),
             Self::Phi => write!(f, "phi"),
-            Self::Gemma => write!(f, "gemma"),
             Self::BitNet => write!(f, "bitnet"),
         }
     }
@@ -55,6 +55,7 @@ pub enum ModelRole {
     GpuPrimary,
     DeepReasoner,
     VisionTower,
+    Embedder,
 }
 
 /// Specific artifact target to download and commit.
@@ -87,6 +88,7 @@ pub struct BootstrapPlan {
     pub primary: Option<ModelTarget>,
     pub deep_reasoner: Option<ModelTarget>,
     pub vision_tower: Option<ModelTarget>,
+    pub embedder: Option<ModelTarget>,
 }
 
 impl BootstrapPlan {
@@ -101,6 +103,9 @@ impl BootstrapPlan {
         }
         if let Some(v) = &self.vision_tower {
             list.push(v);
+        }
+        if let Some(e) = &self.embedder {
+            list.push(e);
         }
         if let Some(r) = &self.deep_reasoner {
             list.push(r);

@@ -134,6 +134,17 @@ fn render_human_plan(plan: &BootstrapPlan, dry_run: bool) {
         );
     }
 
+    if let Some(e) = &plan.embedder {
+        println!(
+            "  Embedder:         {}:{} [{} - {}] (~{:.0} MB)",
+            e.name,
+            e.tag,
+            e.quant,
+            e.file,
+            e.estimated_bytes as f64 / (1024.0 * 1024.0)
+        );
+    }
+
     if let Some(r) = &plan.deep_reasoner {
         println!(
             "  Deep Reasoner:    {}:{} [{} - {}] (~{:.1} GB)",

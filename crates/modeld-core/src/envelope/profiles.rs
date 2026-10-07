@@ -94,6 +94,7 @@ pub(crate) fn plan_qwen(budget: &MemoryBudget) -> BootstrapPlan {
         primary,
         deep_reasoner,
         vision_tower: None,
+        embedder: None,
     }
 }
 
@@ -144,6 +145,7 @@ pub(crate) fn plan_granite(budget: &MemoryBudget) -> BootstrapPlan {
         primary,
         deep_reasoner: None,
         vision_tower: None,
+        embedder: None,
     }
 }
 
@@ -212,6 +214,16 @@ pub(crate) fn plan_gemma(budget: &MemoryBudget) -> BootstrapPlan {
         None
     };
 
+    let embedder = Some(mk_target(
+        ModelRole::Embedder,
+        "embeddinggemma",
+        "270m",
+        "unsloth/embeddinggemma-2-GGUF",
+        "embeddinggemma-2-UD-Q4_K_XL.gguf",
+        "Q4_K_XL",
+        168 * 1024 * 1024,
+    ));
+
     BootstrapPlan {
         family: ModelFamily::Gemma,
         budget: budget.clone(),
@@ -219,5 +231,6 @@ pub(crate) fn plan_gemma(budget: &MemoryBudget) -> BootstrapPlan {
         primary,
         deep_reasoner,
         vision_tower,
+        embedder,
     }
 }

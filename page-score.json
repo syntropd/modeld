@@ -1,6 +1,6 @@
 {
  "repo": "modeld",
- "rev": "3c80ccd",
+ "rev": "55a0a53",
  "dirty": false,
  "pages": [
   {
@@ -75,7 +75,7 @@
   },
   {
    "path": "./crates/modelctl/src/cmd/pull/bootstrap.rs",
-   "lines": 189,
+   "lines": 200,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 2
@@ -264,14 +264,14 @@
   },
   {
    "path": "./crates/modeld-core/src/envelope/families.rs",
-   "lines": 198,
+   "lines": 200,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 2
   },
   {
    "path": "./crates/modeld-core/src/envelope/family.rs",
-   "lines": 144,
+   "lines": 149,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 4
@@ -285,14 +285,14 @@
   },
   {
    "path": "./crates/modeld-core/src/envelope/plan.rs",
-   "lines": 97,
+   "lines": 99,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 2
   },
   {
    "path": "./crates/modeld-core/src/envelope/profiles.rs",
-   "lines": 223,
+   "lines": 236,
    "bin_bytes": null,
    "heat_pct": null,
    "reach": 1

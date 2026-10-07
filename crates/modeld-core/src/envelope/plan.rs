@@ -62,6 +62,8 @@ mod tests {
         assert_eq!(plan.draft.quant, "Q8_0");
         assert_eq!(plan.primary.as_ref().unwrap().tag, "9b");
         assert!(plan.vision_tower.is_some());
+        assert!(plan.embedder.is_some());
+        assert_eq!(plan.embedder.as_ref().unwrap().name, "embeddinggemma");
         assert_eq!(plan.deep_reasoner.as_ref().unwrap().tag, "27b");
     }
 
